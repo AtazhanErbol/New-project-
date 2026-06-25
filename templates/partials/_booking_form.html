@@ -1,0 +1,77 @@
+{% load humanize %}
+<section class="booking" id="booking">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Запись онлайн</h2>
+        <div class="booking-form" data-aos="fade-up">
+            <div class="booking-form__progress">
+                <div class="booking-progress-step active" data-step="1"><div class="booking-progress-step__circle"><span>1</span></div><span class="booking-progress-step__label">Мастер</span></div>
+                <div class="booking-progress-step" data-step="2"><div class="booking-progress-step__circle"><span>2</span></div><span class="booking-progress-step__label">Услуга</span></div>
+                <div class="booking-progress-step" data-step="3"><div class="booking-progress-step__circle"><span>3</span></div><span class="booking-progress-step__label">Дата</span></div>
+                <div class="booking-progress-step" data-step="4"><div class="booking-progress-step__circle"><span>4</span></div><span class="booking-progress-step__label">Контакты</span></div>
+            </div>
+            <form method="post" action="{% url 'booking:submit' %}">
+                {% csrf_token %}
+                <input type="text" name="honeypot" class="honeypot" tabindex="-1" autocomplete="off">
+                <input type="hidden" name="master_id" id="selectedMasterId">
+
+                <div class="booking-step active" data-step="1">
+                    <h3 class="booking-step__title">Выберите мастера</h3>
+                    <div class="booking-services" id="mastersList">
+                        {% for master in masters %}
+                        <label class="booking-service-card">
+                            <input type="radio" name="master_radio" value="{{ master.id }}" class="master-radio">
+                            <div class="booking-service-card__inner">
+                                {% if master.photo %}<img src="{{ master.photo.url }}" alt="{{ master.name }}" class="master-photo">{% endif %}
+                                <span class="booking-service-card__name">{{ master.name }}</span>
+                                <span class="booking-service-card__duration">{{ master.specialization }}</span>
+                            </div>
+                        </label>
+                        {% empty %}
+                        <p>Мастера скоро появятся</p>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn--gold booking-next" data-next="2">Далее</button>
+                </div>
+
+                <div class="booking-step" data-step="2">
+                    <h3 class="booking-step__title">Выберите услугу</h3>
+                    <div class="booking-services" id="servicesList">
+                        {% for service in services %}
+                        <label class="booking-service-card">
+                            <input type="radio" name="service" value="{{ service.id }}" class="booking-service-card__input">
+                            <div class="booking-service-card__inner">
+                                <span class="booking-service-card__name">{{ service.name }}</span>
+                                <span class="booking-service-card__price">от {{ service.price_from|intcomma }} тг</span>
+                                <span class="booking-service-card__duration">{{ service.duration_minutes }} мин</span>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <div class="booking-step__buttons"><button type="button" class="btn btn--outline booking-prev" data-prev="1">Назад</button><button type="button" class="btn btn--gold booking-next" data-next="3">Далее</button></div>
+                </div>
+
+                <div class="booking-step" data-step="3">
+                    <h3 class="booking-step__title">Выберите дату и время</h3>
+                    <div class="booking-datetime">
+                        <div class="booking-calendar"><input type="text" id="flatpickr" placeholder="Выберите дату" readonly></div>
+                        <div class="booking-slots" id="slotsContainer"><p class="booking-slots__hint">Сначала выберите дату</p></div>
+                        <input type="hidden" name="slot_id" id="selectedSlotId">
+                    </div>
+                    <div class="booking-step__buttons"><button type="button" class="btn btn--outline booking-prev" data-prev="2">Назад</button><button type="button" class="btn btn--gold booking-next" data-next="4">Далее</button></div>
+                </div>
+
+                <div class="booking-step" data-step="4">
+                    <h3 class="booking-step__title">Контактные данные</h3>
+                    <div class="booking-fields">
+                        <div class="form-group"><input type="text" name="client_name" class="form-input" placeholder="Ваше имя *" required></div>
+                        <div class="form-group"><input type="tel" name="client_phone" class="form-input" placeholder="+7 (___) ___-__-__" required></div>
+                        <div class="form-group"><input type="email" name="client_email" class="form-input" placeholder="Email *" required></div>
+                        <div class="form-group"><textarea name="comment" class="form-input" placeholder="Комментарий (необязательно)" rows="3"></textarea></div>
+                        <label class="form-checkbox"><input type="checkbox" name="consent" required><span class="form-checkbox__mark"></span><span>Согласен с условиями обработки персональных данных</span></label>
+                    </div>
+                    <div class="booking-step__buttons"><button type="button" class="btn btn--outline booking-prev" data-prev="3">Назад</button><button type="submit" class="btn btn--gold">Записаться</button></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

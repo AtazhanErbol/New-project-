@@ -1,0 +1,29 @@
+<section class="reviews" id="reviews">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Отзывы клиентов</h2>
+        <div class="swiper reviews-swiper" data-aos="fade-up">
+            <div class="swiper-wrapper">
+                {% for review in reviews %}
+                <div class="swiper-slide">
+                    <div class="review-card">
+                        <div class="review-card__header">
+                            {% if review.avatar %}<img src="{{ review.avatar.url }}" alt="{{ review.client_name }}" class="review-card__avatar">
+                            {% else %}<div class="review-card__avatar review-card__avatar--placeholder">{{ review.client_name|first }}</div>{% endif %}
+                            <div class="review-card__info">
+                                <span class="review-card__name">{{ review.client_name }}</span>
+                                {% if review.master %}<span class="review-card__master">Мастер: {{ review.master.name }}</span>{% endif %}
+                                <span class="review-card__date">{{ review.created_at|date:"d.m.Y" }}</span>
+                            </div>
+                        </div>
+                        <div class="review-card__stars">
+                            {% for i in "12345" %}{% if forloop.counter <= review.rating %}<svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A96E" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>{% else %}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>{% endif %}{% endfor %}
+                        </div>
+                        <p class="review-card__text">{{ review.text }}</p>
+                    </div>
+                </div>
+                {% empty %}<p>Отзывы скоро появятся</p>{% endfor %}
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+</section>

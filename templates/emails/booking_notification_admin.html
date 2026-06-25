@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FAF7F2;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;"><tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;">
+<tr><td style="background:#C9A96E;padding:24px;text-align:center;"><h1 style="margin:0;color:#fff;font-size:20px;">Новая запись</h1></td></tr>
+<tr><td style="padding:32px;">
+<table width="100%" cellpadding="12" cellspacing="0" style="background:#FAF7F2;border-radius:12px;">
+<tr><td style="border-bottom:1px solid #eee;"><strong>Клиент:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.client_name }}</td></tr>
+<tr><td style="border-bottom:1px solid #eee;"><strong>Телефон:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.client_phone }}</td></tr>
+<tr><td style="border-bottom:1px solid #eee;"><strong>Email:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.client_email }}</td></tr>
+<tr><td style="border-bottom:1px solid #eee;"><strong>Услуга:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.service.name }}</td></tr>
+<tr><td style="border-bottom:1px solid #eee;"><strong>Дата:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.slot.date|date:"d.m.Y" }}</td></tr>
+<tr><td style="border-bottom:1px solid #eee;"><strong>Время:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.slot.time|time:"H:i" }}</td></tr>
+<tr><td><strong>Комментарий:</strong></td><td>{{ booking.comment|default:"—" }}</td></tr>
+</table></td></tr>
+<tr><td style="background:#FAF7F2;padding:16px;text-align:center;"><p style="color:#999;font-size:12px;">Beauty by Kabylova · Админ</p></td></tr>
+</table></td></tr></table>
+</body></html>

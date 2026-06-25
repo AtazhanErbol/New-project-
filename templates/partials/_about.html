@@ -1,0 +1,24 @@
+<section class="about" id="about">
+    <div class="container">
+        <div class="about__grid">
+            <div class="about__image" data-aos="fade-right">
+                {% if site_settings.about_image %}<img src="{{ site_settings.about_image.url }}" alt="{{ site_settings.site_name }}" loading="lazy">
+                {% else %}<div class="about__image-placeholder"><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>{% endif %}
+            </div>
+            <div class="about__content" data-aos="fade-left">
+                <h2 class="section-title">О мастере</h2>
+                {% if site_settings.bio %}<p class="about__bio">{{ site_settings.bio }}</p>{% endif %}
+                <div class="about__counters">
+                    {% if site_settings.years_experience %}<div class="counter"><span class="counter__number" data-count="{{ site_settings.years_experience }}">0</span><span class="counter__label">лет опыта</span></div>{% endif %}
+                    {% if site_settings.clients_count %}<div class="counter"><span class="counter__number" data-count="{{ site_settings.clients_count }}">0</span><span class="counter__label">клиентов</span></div>{% endif %}
+                    {% if site_settings.works_count %}<div class="counter"><span class="counter__number" data-count="{{ site_settings.works_count }}">0</span><span class="counter__label">работ</span></div>{% endif %}
+                </div>
+                <div class="about__details">
+                    {% if site_settings.address %}<div class="about__detail"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>{{ site_settings.address }}</span></div>{% endif %}
+                    {% if site_settings.working_hours %}<div class="about__detail"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>{{ site_settings.working_hours }}</span></div>{% endif %}
+                </div>
+                {% if site_settings.instagram_url %}<a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener" class="btn btn--outline"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg> Instagram</a>{% endif %}
+            </div>
+        </div>
+    </div>
+</section>

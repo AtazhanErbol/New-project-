@@ -1,0 +1,26 @@
+<section class="gallery" id="gallery">
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Наши работы</h2>
+        <div class="gallery__filters" data-aos="fade-up">
+            <button class="filter-btn active" data-gallery-filter="all">Все</button>
+            <button class="filter-btn" data-gallery-filter="manicure">Маникюр</button>
+            <button class="filter-btn" data-gallery-filter="pedicure">Педикюр</button>
+            <button class="filter-btn" data-gallery-filter="design">Дизайн</button>
+            {% for master in masters %}
+            <button class="filter-btn" data-gallery-filter="master-{{ master.id }}">{{ master.name }}</button>
+            {% endfor %}
+        </div>
+        <div class="gallery__grid" data-aos="fade-up">
+            {% for item in portfolio %}
+            {% if item.image %}
+            <a href="{{ item.image.url }}" class="gallery__item glightbox" data-gallery-category="{{ item.category }}" data-gallery-master="{{ item.master.id|default:'' }}">
+                <img src="{{ item.image.url }}" alt="{{ item.alt_text }}" loading="lazy">
+                <div class="gallery__overlay">
+                    <span>{{ item.get_category_display }}{% if item.master %} &middot; {{ item.master.name }}{% endif %}</span>
+                </div>
+            </a>
+            {% endif %}
+            {% empty %}<p>Фото скоро появятся</p>{% endfor %}
+        </div>
+    </div>
+</section>

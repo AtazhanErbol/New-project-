@@ -1,0 +1,13 @@
+*.pyc
+__pycache__/
+.env
+db.sqlite3
+staticfiles/
+media/
+venv/
+*.egg-info/
+_seed.py
+_g_css.py
+g.py
+_fix_css.py
+seed.py
