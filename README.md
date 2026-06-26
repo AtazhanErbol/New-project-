@@ -199,6 +199,56 @@ ADMIN_EMAIL=admin@example.com
 > В продакшен-режиме (`config.settings.production`) переменная окружения `ALLOWED_HOSTS`
 > обязательна — без неё приложение не запустится (раньше был небезопасный плейсхолдер).
 
+## Деплой на PythonAnywhere
+
+Используются настройки `config.settings.pythonanywhere` (SQLite, без HSTS/SSL-редиректа —
+PythonAnywhere сам терминирует HTTPS).
+
+1. Зарегистрироваться на pythonanywhere.com (Beginner — бесплатно).
+2. Открыть **Bash console** и выполнить:
+   ```bash
+   git clone https://github.com/AtazhanErbol/New-project-.git
+   cd New-project-
+   mkvirtualenv --python=python3.12 venv
+   pip install -r requirements.txt
+   ```
+3. Создать файл `.env` в корне проекта (`nano .env`):
+   ```env
+   DJANGO_SECRET_KEY=сгенерированный-секретный-ключ
+   EMAIL_HOST_USER=your-gmail@gmail.com
+   EMAIL_HOST_PASSWORD=your-app-password
+   ADMIN_EMAIL=admin@example.com
+   ```
+4. Выполнить миграции и собрать статику:
+   ```bash
+   export DJANGO_SETTINGS_MODULE=config.settings.pythonanywhere
+   python manage.py migrate
+   python manage.py collectstatic --noinput
+   python manage.py createsuperuser
+   ```
+5. На вкладке **Web** создать новое приложение → Manual configuration → Python 3.12,
+   указать virtualenv `venv`, открыть WSGI-файл и заменить его содержимое на:
+   ```python
+   import os
+   import sys
+
+   path = '/home/<username>/New-project-'
+   if path not in sys.path:
+       sys.path.insert(0, path)
+
+   os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.pythonanywhere'
+
+   from django.core.wsgi import get_wsgi_application
+   application = get_wsgi_application()
+   ```
+6. В разделе **Static files** вкладки Web добавить:
+   - URL `/static/` → Directory `/home/<username>/New-project-/staticfiles`
+   - URL `/media/` → Directory `/home/<username>/New-project-/media`
+7. Нажать **Reload**.
+
+> Бесплатный тариф: нет cron — `generate_slots` нужно запускать вручную через Bash console
+> раз в 1–2 недели; обновление кода — `git pull` + Reload (без авто-деплоя).
+
 ---
 
 **Автор:** AtazhanErbol
