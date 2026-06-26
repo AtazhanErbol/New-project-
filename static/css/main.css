@@ -1,6 +1,6 @@
-:root{--ivory:#FAF7F2;--rose:#F5C6D0;--gold:#C9A96E;--chocolate:#2C1A1A;--white:#FFF;--shadow:0 4px 24px rgba(0,0,0,.06);--radius:16px;--transition:.3s cubic-bezier(.4,0,.2,1)}
+:root{--ivory:#FAF7F2;--rose:#F5C6D0;--gold:#C9A96E;--chocolate:#2C1A1A;--white:#FFF;--shadow:0 4px 24px rgba(0,0,0,.06);--radius:16px;--transition:.3s cubic-bezier(.4,0,.2,1);color-scheme:light}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;color-scheme:light;overflow-x:hidden}
 body{font-family:'Inter',sans-serif;color:var(--chocolate);background:var(--ivory);line-height:1.6;overflow-x:hidden}
 body.no-scroll{overflow:hidden}
 h1,h2,h3,h4{font-family:'Playfair Display',serif}
@@ -133,13 +133,13 @@ a{text-decoration:none;color:inherit}
 .slot-btn--booked,.slot-btn--unavailable{cursor:not-allowed;background:transparent;color:rgba(44,26,26,.35);border-color:#eee}
 .slot-btn--booked{text-decoration:line-through}
 .slot-btn--booked:hover,.slot-btn--unavailable:hover{border-color:#eee}
-.booking-step__buttons{display:flex;gap:12px;justify-content:space-between}
+.booking-step__buttons{display:flex;gap:12px;justify-content:space-between;margin-top:24px}
 .booking-fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .form-group{margin-bottom:0}
 .form-group:has(input[type="email"]),.form-group:has(textarea){grid-column:1/-1}
 .form-input{width:100%;padding:14px 16px;border:2px solid #eee;border-radius:12px;font-size:16px;transition:var(--transition);background:var(--ivory)}
 .form-input:focus{outline:none;border-color:var(--gold);background:var(--white)}
-.form-checkbox{grid-column:1/-1;display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.4;cursor:pointer;margin-top:8px}
+.form-checkbox{grid-column:1/-1;display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.4;cursor:pointer;margin-top:12px;margin-bottom:8px}
 .form-checkbox input{width:18px;height:18px;flex-shrink:0;margin-top:1px;accent-color:var(--gold);cursor:pointer}
 .honeypot{position:absolute;left:-9999px;opacity:0}
 .footer{padding:60px 0 0;background:var(--chocolate);color:var(--white)}
@@ -147,7 +147,7 @@ a{text-decoration:none;color:inherit}
 .footer__logo{font-size:24px;margin-bottom:20px;font-family:Playfair Display,serif}
 .footer__detail{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:15px;opacity:.8}
 .footer__detail a{color:var(--white)}
-.footer__social-links{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.footer__social-links{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:20px}
 .social-link{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:50px;font-size:14px;font-weight:500;transition:var(--transition);border:1px solid rgba(255,255,255,.3)}
 .social-link__icon{flex-shrink:0}
 .social-link:hover{background:rgba(255,255,255,.15)}
