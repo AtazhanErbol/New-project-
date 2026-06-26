@@ -23,11 +23,18 @@ class MasterAdmin(admin.ModelAdmin):
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'category', 'duration_minutes', 'price_from', 'is_active', 'order']
+    list_display = ['thumbnail', 'name', 'category', 'duration_minutes', 'price_from', 'is_active', 'order']
     list_filter = ['category', 'is_active']
+    search_fields = ['name']
     list_editable = ['is_active', 'order']
-    list_display_links = ['id', 'name']
+    list_display_links = ['name']
     filter_horizontal = ['masters']
+
+    def thumbnail(self, obj):
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" style="width:48px;height:48px;border-radius:8px;object-fit:cover">')
+        return '-'
+    thumbnail.short_description = 'Фото'
 
 
 @admin.register(TimeSlot)

@@ -1,6 +1,10 @@
 from django.contrib import admin
 from .models import SiteSettings
 
+admin.site.site_header = 'Beauty by Kabylova — Админ-панель'
+admin.site.site_title = 'Beauty by Kabylova'
+admin.site.index_title = 'Управление сайтом'
+
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):

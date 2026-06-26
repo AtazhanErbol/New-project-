@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --ivory: #FAF7F2;
+    --rose: #F5C6D0;
+    --gold: #C9A96E;
+    --chocolate: #2C1A1A;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--ivory);
+}
+
+#header {
+    background: linear-gradient(135deg, var(--chocolate), #4a332c);
+    color: #fff;
+}
+
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+#user-tools a {
+    color: var(--rose) !important;
+}
+
+div.breadcrumbs {
+    background: var(--gold);
+    color: #fff;
+}
+
+div.breadcrumbs a {
+    color: #fff;
+}
+
+.module h2, .module caption, .inline-group h2 {
+    background: var(--chocolate);
+    font-family: 'Inter', sans-serif;
+}
+
+a:link, a:visited {
+    color: #9c7a3f;
+}
+
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background: var(--gold);
+    border-radius: 8px;
+    border: none;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover {
+    background: #b8943e;
+}
+
+.button.default, input[type=submit].default, .submit-row input.default {
+    background: var(--chocolate);
+}
+
+.button.default:hover, input[type=submit].default:hover {
+    background: #4a332c;
+}
+
+#changelist-filter h2 {
+    background: var(--chocolate);
+}
+
+.object-tools a {
+    background: var(--chocolate) !important;
+    border-radius: 8px;
+}
+
+table thead th {
+    background: #fdf3f6;
+}
+
+.dashboard .module table th {
+    width: auto;
+}
+
+#content-related .module {
+    background: #fff;
+    border-radius: 12px;
+}
+
+.calendar caption, .calendarbox h2 {
+    background: var(--chocolate);
+}
+
+.selector-chosen h2 {
+    background: var(--chocolate);
+}
