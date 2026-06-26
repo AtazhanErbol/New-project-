@@ -12,7 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
         burger.addEventListener('click', function() {
             this.classList.toggle('active');
             mobileMenu.classList.toggle('active');
-            document.body.classList.toggle('no-scroll', mobileMenu.classList.contains('active'));
+            var open = mobileMenu.classList.contains('active');
+            document.body.classList.toggle('no-scroll', open);
+            if (navbar) navbar.classList.toggle('menu-open', open);
         });
         var mlinks = mobileMenu.querySelectorAll('a');
         for (var i = 0; i < mlinks.length; i++) {
@@ -20,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 mobileMenu.classList.remove('active');
                 burger.classList.remove('active');
                 document.body.classList.remove('no-scroll');
+                if (navbar) navbar.classList.remove('menu-open');
             });
         }
     }
