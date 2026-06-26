@@ -89,10 +89,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
     'default': { 'BACKEND': 'django.core.files.storage.FileSystemStorage' },
     'staticfiles': {
-        # Только хэширование имён (сброс кэша), без gzip/brotli-сжатия.
-        # WhiteNoise-сжатие сотен файлов jazzmin намертво вешало collectstatic
-        # на слабом CPU PythonAnywhere — отдачу сожмёт фронт PA на лету.
-        'BACKEND': 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage',
+        # Хэш-имена (сброс кэша) без сжатия и без 500 на отсутствующих
+        # в манифесте путях jazzmin (см. config/storages.py).
+        'BACKEND': 'config.storages.LenientManifestStaticFilesStorage',
     },
 }
 
