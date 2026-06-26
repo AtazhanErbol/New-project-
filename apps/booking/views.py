@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
-from .models import TimeSlot, Booking, Master, Service
+from .models import TimeSlot, Booking, Master, Service, slots_are_contiguous
 from .forms import BookingForm
 import datetime
 
@@ -21,22 +21,44 @@ logger = logging.getLogger(__name__)
 def get_available_slots(request):
     date_str = request.GET.get('date')
     master_id = request.GET.get('master_id')
+    service_id = request.GET.get('service_id')
     if not date_str:
         return JsonResponse({'slots': []})
     try:
         date = datetime.date.fromisoformat(date_str)
     except ValueError:
         return JsonResponse({'slots': []})
+
+    needed = 1
+    if service_id:
+        try:
+            needed = Service.objects.get(id=service_id).slot_count
+        except Service.DoesNotExist:
+            pass
+
     now = timezone.localtime().replace(tzinfo=None)
-    slots = TimeSlot.objects.filter(date=date, is_booked=False)
+    slots = TimeSlot.objects.filter(date=date)
     if master_id:
         slots = slots.filter(master_id=master_id)
-    slots = slots.order_by('time')
+    slots = list(slots.order_by('time'))
+
     data = []
-    for s in slots:
+    for i, s in enumerate(slots):
         slot_dt = datetime.datetime.combine(s.date, s.time)
-        if slot_dt > now:
-            data.append({'id': s.id, 'time': s.time.strftime('%H:%M'), 'master': s.master.name if s.master else ''})
+        if slot_dt <= now:
+            continue
+        window = slots[i:i + needed]
+        fits = (
+            len(window) == needed
+            and not any(w.is_booked for w in window)
+            and slots_are_contiguous(window)
+        )
+        data.append({
+            'id': s.id,
+            'time': s.time.strftime('%H:%M'),
+            'booked': s.is_booked,
+            'available': fits,
+        })
     return JsonResponse({'slots': data})
 
 
@@ -92,8 +114,21 @@ def submit_booking(request):
             if slot_dt <= now:
                 messages.error(request, 'Это время уже прошло, выберите другое.')
                 return redirect('/#booking')
-            slot.is_booked = True
-            slot.save()
+
+            needed = service.slot_count
+            window = list(
+                TimeSlot.objects.select_for_update()
+                .filter(date=slot.date, master=slot.master, time__gte=slot.time)
+                .order_by('time')[:needed]
+            )
+            if len(window) < needed or any(w.is_booked for w in window) or not slots_are_contiguous(window):
+                messages.error(request, 'Недостаточно времени для этой услуги в выбранный слот, выберите другое время.')
+                return redirect('/#booking')
+
+            for w in window:
+                w.is_booked = True
+                w.save(update_fields=['is_booked'])
+
             booking = form.save(commit=False)
             booking.slot = slot
             booking.master = master or slot.master
@@ -121,8 +156,7 @@ def cancel_booking(request, signed_token):
     with transaction.atomic():
         booking.status = 'cancelled'
         booking.save()
-        booking.slot.is_booked = False
-        booking.slot.save()
+        booking.release_slots()
     messages.success(request, 'Ваша запись отменена.')
     return redirect('/')
 

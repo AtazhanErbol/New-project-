@@ -9,10 +9,18 @@ document.addEventListener('DOMContentLoaded', function() {
     var burger = document.getElementById('burger');
     var mobileMenu = document.getElementById('mobileMenu');
     if (burger && mobileMenu) {
-        burger.addEventListener('click', function() { this.classList.toggle('active'); mobileMenu.classList.toggle('active'); });
+        burger.addEventListener('click', function() {
+            this.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.classList.toggle('no-scroll', mobileMenu.classList.contains('active'));
+        });
         var mlinks = mobileMenu.querySelectorAll('a');
         for (var i = 0; i < mlinks.length; i++) {
-            mlinks[i].addEventListener('click', function() { mobileMenu.classList.remove('active'); });
+            mlinks[i].addEventListener('click', function() {
+                mobileMenu.classList.remove('active');
+                burger.classList.remove('active');
+                document.body.classList.remove('no-scroll');
+            });
         }
     }
 
@@ -163,21 +171,29 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!c) return;
         c.innerHTML = '<p class="booking-slots__hint">Загрузка...</p>';
         var masterId = document.getElementById('selectedMasterId').value;
+        var svcInput = document.querySelector('.booking-service-card__input:checked');
         var url = '/booking/slots/?date=' + date;
         if (masterId) url += '&master_id=' + masterId;
+        if (svcInput) url += '&service_id=' + svcInput.value;
         fetch(url)
             .then(function(r) { return r.json(); })
             .then(function(data) {
+                document.getElementById('selectedSlotId').value = '';
                 if (!data.slots || !data.slots.length) {
                     c.innerHTML = '<p class="booking-slots__hint">Нет свободных слотов</p>';
                     return;
                 }
                 var html = '';
                 for (var i = 0; i < data.slots.length; i++) {
-                    html += '<button type="button" class="slot-btn" data-slot-id="' + data.slots[i].id + '">' + data.slots[i].time + '</button>';
+                    var s = data.slots[i];
+                    var cls = 'slot-btn';
+                    var attrs = '';
+                    if (s.booked) { cls += ' slot-btn--booked'; attrs = 'disabled title="Уже занято"'; }
+                    else if (!s.available) { cls += ' slot-btn--unavailable'; attrs = 'disabled title="Недостаточно времени для услуги"'; }
+                    html += '<button type="button" class="' + cls + '" data-slot-id="' + s.id + '" ' + attrs + '>' + s.time + '</button>';
                 }
                 c.innerHTML = html;
-                var btns = c.querySelectorAll('.slot-btn');
+                var btns = c.querySelectorAll('.slot-btn:not([disabled])');
                 for (var i = 0; i < btns.length; i++) {
                     btns[i].addEventListener('click', function() {
                         var all = c.querySelectorAll('.slot-btn');

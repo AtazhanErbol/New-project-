@@ -121,8 +121,7 @@ class BookingAdmin(admin.ModelAdmin):
             b.status = 'cancelled'
             b.save()
             if b.slot:
-                b.slot.is_booked = False
-                b.slot.save()
+                b.release_slots()
 
     @admin.action(description='Экспорт в CSV')
     def export_to_csv(self, request, queryset):

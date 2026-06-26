@@ -4,6 +4,7 @@ from django.db import models
 class SiteSettings(models.Model):
     site_name = models.CharField(max_length=200, default='Beauty by Kabylova', verbose_name='Название сайта')
     logo_text = models.CharField(max_length=100, default='by Kabylova', verbose_name='Текст логотипа')
+    logo_image = models.ImageField(upload_to='logo/', blank=True, verbose_name='Логотип (картинка)')
     phone = models.CharField(max_length=30, blank=True, verbose_name='Телефон')
     address = models.CharField(max_length=200, blank=True, verbose_name='Адрес')
     working_hours = models.CharField(max_length=100, blank=True, verbose_name='Режим работы')

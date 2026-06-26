@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import math
 import secrets
 import datetime
 
@@ -46,6 +47,11 @@ class Service(models.Model):
 
     def __str__(self):
         return f'{self.name} — от {self.price_from} тг'
+
+    @property
+    def slot_count(self):
+        """Сколько 30-минутных слотов занимает услуга."""
+        return max(1, math.ceil(self.duration_minutes / 30))
 
 
 class TimeSlot(models.Model):
@@ -107,6 +113,29 @@ class Booking(models.Model):
         signer = TimestampSigner()
         signed = signer.sign(self.cancel_token)
         return f'/booking/cancel/{signed}/'
+
+    def get_reserved_slots(self):
+        """Все слоты, занятые этой записью (с учётом длительности услуги)."""
+        return TimeSlot.objects.filter(
+            date=self.slot.date, master=self.slot.master, time__gte=self.slot.time
+        ).order_by('time')[:self.service.slot_count]
+
+    def release_slots(self):
+        for s in self.get_reserved_slots():
+            s.is_booked = False
+            s.save(update_fields=['is_booked'])
+
+
+def slots_are_contiguous(slots):
+    """Проверяет, что слоты идут подряд без пропусков по 30 минут."""
+    if not slots:
+        return False
+    expected = slots[0].time
+    for s in slots:
+        if s.time != expected:
+            return False
+        expected = (datetime.datetime.combine(s.date, expected) + datetime.timedelta(minutes=30)).time()
+    return True
 
 
 def generate_slots_for_master(master):

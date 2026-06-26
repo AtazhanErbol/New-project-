@@ -9,7 +9,7 @@ admin.site.index_title = 'Управление сайтом'
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
     fieldsets = [
-        ('Основное', {'fields': ['site_name', 'logo_text', 'hero_image', 'about_image', 'bio']}),
+        ('Основное', {'fields': ['site_name', 'logo_text', 'logo_image', 'hero_image', 'about_image', 'bio']}),
         ('Контакты', {'fields': ['phone', 'email', 'address', 'working_hours']}),
         ('Акция', {'fields': ['promo_text']}),
         ('Статистика', {'fields': ['years_experience', 'clients_count', 'works_count']}),

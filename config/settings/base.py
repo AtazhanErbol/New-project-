@@ -11,6 +11,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-change-me-in-prod
 DEBUG = env.bool('DEBUG', default=True)
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -119,6 +120,44 @@ LOGGING = {
     },
     'loggers': {
         'apps': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+    },
+}
+
+JAZZMIN_SETTINGS = {
+    'site_title': 'Beauty by Kabylova',
+    'site_header': 'Kabylova',
+    'site_brand': 'Beauty by Kabylova',
+    'welcome_sign': 'Управление сайтом Beauty by Kabylova',
+    'copyright': 'Beauty by Kabylova',
+    'search_model': ['booking.Booking', 'booking.Service'],
+    'order_with_respect_to': ['core', 'booking', 'portfolio', 'reviews'],
+    'icons': {
+        'auth.user': 'fas fa-user',
+        'auth.Group': 'fas fa-users',
+        'core.SiteSettings': 'fas fa-cog',
+        'booking.Master': 'fas fa-user-tie',
+        'booking.Service': 'fas fa-spa',
+        'booking.TimeSlot': 'fas fa-clock',
+        'booking.Booking': 'fas fa-calendar-check',
+    },
+    'show_ui_builder': False,
+    'changeform_format': 'horizontal_tabs',
+}
+
+JAZZMIN_UI_TWEAKS = {
+    'navbar': 'navbar-dark',
+    'navbar_fixed': True,
+    'theme': 'flatly',
+    'no_navbar_border': True,
+    'brand_colour': 'navbar-dark',
+    'accent': 'accent-warning',
+    'button_classes': {
+        'primary': 'btn-warning',
+        'secondary': 'btn-secondary',
+        'info': 'btn-info',
+        'warning': 'btn-warning',
+        'danger': 'btn-danger',
+        'success': 'btn-success',
     },
 }
 

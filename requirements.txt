@@ -8,6 +8,7 @@ django-axes
 django-honeypot
 django-ratelimit
 django-csp
+django-jazzmin
 
 django-compressor
 django-debug-toolbar
