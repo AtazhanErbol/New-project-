@@ -7,7 +7,9 @@ DEBUG = False
 # На бесплатном тарифе PythonAnywhere нет UI для переменных окружения —
 # проще всего задать ALLOWED_HOSTS прямо в WSGI-файле (см. инструкцию в README),
 # поэтому здесь разумный дефолт + возможность переопределить через env.
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*.pythonanywhere.com'])
+# Важно: Django понимает wildcard-поддомены только в виде ".domain.com"
+# (с точкой в начале), а не "*.domain.com".
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['.pythonanywhere.com'])
 
 CSRF_TRUSTED_ORIGINS = ['https://*.pythonanywhere.com']
 
