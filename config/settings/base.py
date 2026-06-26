@@ -63,7 +63,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='sqlite:///db.sqlite3'),
+    # Без абсолютного пути sqlite-файл резолвится относительно текущей
+    # рабочей директории процесса, а не BASE_DIR — на PythonAnywhere у
+    # WSGI-воркера и Bash-консоли разный CWD, из-за чего они читали/писали
+    # разные файлы db.sqlite3.
+    'default': env.db('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}'),
 }
 
 AUTH_PASSWORD_VALIDATORS = [
