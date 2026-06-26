@@ -169,6 +169,18 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+## Тесты
+
+```bash
+python manage.py test apps.booking
+```
+
+## Продление сетки слотов (запускать по cron раз в день/неделю)
+
+```bash
+python manage.py generate_slots
+```
+
 ## Настройка почты (.env)
 
 ```env
@@ -183,6 +195,9 @@ ADMIN_EMAIL=admin@example.com
 # Автоматический через render.yaml
 # Нужно: PostgreSQL, переменные окружения
 ```
+
+> В продакшен-режиме (`config.settings.production`) переменная окружения `ALLOWED_HOSTS`
+> обязательна — без неё приложение не запустится (раньше был небезопасный плейсхолдер).
 
 ---
 

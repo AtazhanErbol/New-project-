@@ -59,40 +59,6 @@
     <script src="{% static 'js/animations.js' %}"></script>
     <script src="{% static 'js/cursor.js' %}"></script>
     <script src="{% static 'js/booking.js' %}"></script>
-    <script>
-    (function(){
-        var params = new URLSearchParams(window.location.search);
-        if (params.get('booking') === 'ok') {
-            var modal = document.getElementById('bookingModal');
-            if (modal) { modal.classList.add('active'); modal.style.display = 'flex'; }
-            window.history.replaceState(null, null, window.location.pathname + '#booking');
-        }
-        var closeBtn = document.getElementById('modalClose');
-        var overlay = document.getElementById('bookingModal');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                overlay.classList.remove('active');
-                overlay.style.display = 'none';
-            });
-        }
-        if (overlay) {
-            overlay.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('active');
-                    this.style.display = 'none';
-                }
-            });
-        }
-        var modalBtns = overlay ? overlay.querySelectorAll('.btn') : [];
-        for (var i = 0; i < modalBtns.length; i++) {
-            modalBtns[i].addEventListener('click', function(e) {
-                overlay.classList.remove('active');
-                overlay.style.display = 'none';
-            });
-        }
-    })();
-    </script>
+    <script src="{% static 'js/modal.js' %}"></script>
 </body>
 </html>

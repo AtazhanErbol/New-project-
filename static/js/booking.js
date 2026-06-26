@@ -99,6 +99,30 @@ document.addEventListener('DOMContentLoaded', function() {
         if (target) target.classList.add('active');
     }
 
+    // FILTER SERVICES BY SELECTED MASTER
+    function filterServicesByMaster(masterId) {
+        fetch('/booking/services/?master_id=' + masterId)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var allowedIds = (data.services || []).map(function(s) { return String(s.id); });
+                var cards = document.querySelectorAll('#servicesList .booking-service-card');
+                for (var i = 0; i < cards.length; i++) {
+                    var input = cards[i].querySelector('.booking-service-card__input');
+                    var allowed = allowedIds.indexOf(input.value) !== -1;
+                    cards[i].style.display = allowed ? '' : 'none';
+                    if (!allowed && input.checked) input.checked = false;
+                }
+            })
+            .catch(function() {});
+    }
+
+    var masterRadios = document.querySelectorAll('.master-radio');
+    for (var i = 0; i < masterRadios.length; i++) {
+        masterRadios[i].addEventListener('change', function() {
+            if (this.checked) filterServicesByMaster(this.value);
+        });
+    }
+
     var nextBtns = document.querySelectorAll('.booking-next');
     for (var i = 0; i < nextBtns.length; i++) {
         nextBtns[i].addEventListener('click', function() {
@@ -170,11 +194,25 @@ document.addEventListener('DOMContentLoaded', function() {
     var phone = document.querySelector('input[name="client_phone"]');
     if (phone) {
         phone.addEventListener('input', function(e) {
-            var v = e.target.value.replace(/\D/g, '');
- 
+            var input = e.target;
+            var digitsBefore = input.value.slice(0, input.selectionStart).replace(/\D/g, '').length;
+            var v = input.value.replace(/\D/g, '');
+            if (!v) { input.value = ''; return; }
             if (!v.startsWith('7')) v = '7' + v;
             v = v.substring(0, 11);
-            e.target.value = '+7 (' + v.substring(1, 4) + ') ' + v.substring(4, 7) + '-' + v.substring(7, 9) + '-' + v.substring(9, 11);
+
+            var formatted = '+7';
+            if (v.length > 1) formatted += ' (' + v.substring(1, 4);
+            if (v.length >= 4) formatted += ') ' + v.substring(4, 7);
+            if (v.length >= 7) formatted += '-' + v.substring(7, 9);
+            if (v.length >= 9) formatted += '-' + v.substring(9, 11);
+            input.value = formatted;
+
+            var pos = 0, seen = 0;
+            for (; pos < formatted.length && seen < digitsBefore; pos++) {
+                if (/\d/.test(formatted[pos])) seen++;
+            }
+            input.setSelectionRange(pos, pos);
         });
     }
     var cards = document.querySelectorAll('.service-card');

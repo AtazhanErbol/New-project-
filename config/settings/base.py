@@ -107,12 +107,25 @@ AXES_COOLOFF_TIME = 0.5
 AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = True
 HONEYPOT_FIELD_NAME = 'honeypot'
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'loggers': {
+        'apps': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+    },
+}
+
 CONTENT_SECURITY_POLICY = {
     'DIRECTIVES': {
         'default-src': ("'self'",),
-        'script-src': ("'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"),
+        'script-src': ("'self'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"),
         'style-src': ("'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"),
         'font-src': ("'self'", "https://fonts.gstatic.com"),
         'img-src': ("'self'", "data:", "https:"),
+        'connect-src': ("'self'",),
+        'form-action': ("'self'",),
     }
 }

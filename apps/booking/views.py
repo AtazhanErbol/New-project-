@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
@@ -6,11 +8,16 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.db import transaction
-from .models import TimeSlot, Booking, Master
+from django.utils import timezone
+from django_ratelimit.decorators import ratelimit
+from .models import TimeSlot, Booking, Master, Service
 from .forms import BookingForm
 import datetime
 
+logger = logging.getLogger(__name__)
 
+
+@ratelimit(key='ip', rate='20/m', block=True)
 def get_available_slots(request):
     date_str = request.GET.get('date')
     master_id = request.GET.get('master_id')
@@ -20,12 +27,10 @@ def get_available_slots(request):
         date = datetime.date.fromisoformat(date_str)
     except ValueError:
         return JsonResponse({'slots': []})
-    now = datetime.datetime.now()
+    now = timezone.localtime().replace(tzinfo=None)
     slots = TimeSlot.objects.filter(date=date, is_booked=False)
     if master_id:
         slots = slots.filter(master_id=master_id)
-    elif master_id == '' or master_id is None:
-        pass
     slots = slots.order_by('time')
     data = []
     for s in slots:
@@ -35,13 +40,29 @@ def get_available_slots(request):
     return JsonResponse({'slots': data})
 
 
+@ratelimit(key='ip', rate='20/m', block=True)
 def get_masters(request):
-    from apps.booking.models import Master
+    service_id = request.GET.get('service_id')
     masters = Master.objects.filter(is_active=True)
+    if service_id:
+        masters = masters.filter(services__id=service_id)
     data = [{'id': m.id, 'name': m.name, 'specialization': m.specialization} for m in masters]
     return JsonResponse({'masters': data})
 
 
+@ratelimit(key='ip', rate='20/m', block=True)
+def get_services(request):
+    master_id = request.GET.get('master_id')
+    services = Service.objects.filter(is_active=True)
+    if master_id:
+        master = get_object_or_404(Master, id=master_id)
+        if master.services.exists():
+            services = services.filter(masters=master)
+    data = [{'id': s.id, 'name': s.name, 'price_from': str(s.price_from), 'duration_minutes': s.duration_minutes} for s in services]
+    return JsonResponse({'services': data})
+
+
+@ratelimit(key='ip', rate='5/m', block=True)
 def submit_booking(request):
     if request.method != 'POST':
         return redirect('/')
@@ -51,26 +72,39 @@ def submit_booking(request):
     if not slot_id:
         messages.error(request, 'Выберите время')
         return redirect('/#booking')
-    if form.is_valid():
-        try:
-            slot = TimeSlot.objects.select_for_update().get(id=slot_id, is_booked=False)
-        except TimeSlot.DoesNotExist:
-            messages.error(request, 'Это время уже занято.')
+    if not form.is_valid():
+        messages.error(request, 'Исправьте ошибки в форме.')
+        return redirect('/#booking')
+
+    service = form.cleaned_data['service']
+    master = None
+    if master_id:
+        master = get_object_or_404(Master, id=master_id)
+        if service.masters.exists() and not service.masters.filter(id=master.id).exists():
+            messages.error(request, 'Выбранный мастер не оказывает эту услугу.')
             return redirect('/#booking')
+
+    now = timezone.localtime().replace(tzinfo=None)
+    try:
         with transaction.atomic():
+            slot = TimeSlot.objects.select_for_update().get(id=slot_id, is_booked=False)
+            slot_dt = datetime.datetime.combine(slot.date, slot.time)
+            if slot_dt <= now:
+                messages.error(request, 'Это время уже прошло, выберите другое.')
+                return redirect('/#booking')
             slot.is_booked = True
             slot.save()
             booking = form.save(commit=False)
             booking.slot = slot
-            if master_id:
-                booking.master = get_object_or_404(Master, id=master_id)
-            elif slot.master:
-                booking.master = slot.master
+            booking.master = master or slot.master
+            booking.consent_given_at = timezone.now()
             booking.save()
-        _send_confirmation_email(booking)
-        return redirect('/?booking=ok')
-    messages.error(request, 'Исправьте ошибки в форме.')
-    return redirect('/#booking')
+    except TimeSlot.DoesNotExist:
+        messages.error(request, 'Это время уже занято.')
+        return redirect('/#booking')
+
+    _send_confirmation_email(booking)
+    return redirect('/?booking=ok')
 
 
 def cancel_booking(request, signed_token):
@@ -95,16 +129,21 @@ def cancel_booking(request, signed_token):
 
 def _send_confirmation_email(booking):
     from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER or 'noreply@beauty.kz'
+    client_sent = False
     try:
-        subject = 'Подтверждение записи'
         html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking})
-        send_mail(subject, '', from_email, [booking.client_email], html_message=html)
-        admin_email = getattr(settings, 'ADMIN_EMAIL', '')
-        if admin_email:
+        send_mail('Подтверждение записи', '', from_email, [booking.client_email], html_message=html)
+        client_sent = True
+    except Exception:
+        logger.exception('Не удалось отправить письмо клиенту для booking id=%s', booking.id)
+
+    admin_email = getattr(settings, 'ADMIN_EMAIL', '')
+    if admin_email:
+        try:
             html_admin = render_to_string('emails/booking_notification_admin.html', {'booking': booking})
             send_mail('Новая запись', '', from_email, [admin_email], html_message=html_admin)
-        booking.email_sent = True
-        booking.save(update_fields=['email_sent'])
-    except Exception:
-        booking.email_sent = False
-        booking.save(update_fields=['email_sent'])
+        except Exception:
+            logger.exception('Не удалось отправить письмо администратору для booking id=%s', booking.id)
+
+    booking.email_sent = client_sent
+    booking.save(update_fields=['email_sent'])

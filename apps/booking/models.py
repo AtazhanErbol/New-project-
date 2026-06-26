@@ -52,7 +52,7 @@ class TimeSlot(models.Model):
     date = models.DateField(verbose_name='Дата')
     time = models.TimeField(verbose_name='Время')
     is_booked = models.BooleanField(default=False, verbose_name='Занято')
-    master = models.ForeignKey(Master, on_delete=models.CASCADE, related_name='timeslots', null=True, blank=True, verbose_name='Мастер')
+    master = models.ForeignKey(Master, on_delete=models.SET_NULL, related_name='timeslots', null=True, blank=True, verbose_name='Мастер')
 
     class Meta:
         unique_together = ('date', 'time', 'master')
@@ -87,6 +87,7 @@ class Booking(models.Model):
     cancel_token = models.CharField(max_length=64, unique=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
     email_sent = models.BooleanField(default=False, verbose_name='Email отправлен')
+    consent_given_at = models.DateTimeField(null=True, blank=True, verbose_name='Согласие на обработку ПД дано')
 
     class Meta:
         ordering = ['-created_at']
