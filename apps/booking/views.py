@@ -29,12 +29,19 @@ def get_available_slots(request):
     except ValueError:
         return JsonResponse({'slots': []})
 
-    needed = 1
+    appt = 1
     if service_id:
         try:
-            needed = Service.objects.get(id=service_id).slot_count
+            appt = Service.objects.get(id=service_id).slot_count
         except Service.DoesNotExist:
             pass
+
+    master = Master.objects.filter(id=master_id).first() if master_id else None
+    # Мастер не работает в этот день (выходной / отпуск / больничный) — слотов нет.
+    if master and not master.works_on(date):
+        return JsonResponse({'slots': []})
+
+    buf = master.buffer_slots if master else 0
 
     now = timezone.localtime().replace(tzinfo=None)
     slots = TimeSlot.objects.filter(date=date)
@@ -47,12 +54,25 @@ def get_available_slots(request):
         slot_dt = datetime.datetime.combine(s.date, s.time)
         if slot_dt <= now:
             continue
-        window = slots[i:i + needed]
+        # вне рабочих часов мастера — не показываем вовсе
+        if master and not (master.work_start <= s.time < master.work_end):
+            continue
+
+        window = slots[i:i + appt]
         fits = (
-            len(window) == needed
+            len(window) == appt
             and not any(w.is_booked for w in window)
             and slots_are_contiguous(window)
         )
+        # услуга целиком должна влезать в рабочие часы
+        if fits and master and not master.fits_working_hours(s.time, appt * 30):
+            fits = False
+        # буфер: слоты сразу после записи (которые существуют) должны быть свободны
+        if fits and buf:
+            after = slots[i + appt:i + appt + buf]
+            if any(w.is_booked for w in after):
+                fits = False
+
         data.append({
             'id': s.id,
             'time': s.time.strftime('%H:%M'),
@@ -115,6 +135,11 @@ def submit_booking(request):
                 messages.error(request, 'Это время уже прошло, выберите другое.')
                 return redirect('/#booking')
 
+            sched_master = master or slot.master
+            if sched_master and not sched_master.works_on(slot.date):
+                messages.error(request, 'Мастер не работает в выбранный день, выберите другое время.')
+                return redirect('/#booking')
+
             needed = service.slot_count
             window = list(
                 TimeSlot.objects.select_for_update()
@@ -124,10 +149,21 @@ def submit_booking(request):
             if len(window) < needed or any(w.is_booked for w in window) or not slots_are_contiguous(window):
                 messages.error(request, 'Недостаточно времени для этой услуги в выбранный слот, выберите другое время.')
                 return redirect('/#booking')
+            if sched_master and not sched_master.fits_working_hours(slot.time, needed * 30):
+                messages.error(request, 'Услуга не помещается в рабочие часы мастера, выберите другое время.')
+                return redirect('/#booking')
 
-            for w in window:
-                w.is_booked = True
-                w.save(update_fields=['is_booked'])
+            # Блокируем слоты записи + буфер мастера (существующие слоты после).
+            buf = sched_master.buffer_slots if sched_master else 0
+            block = list(
+                TimeSlot.objects.select_for_update()
+                .filter(date=slot.date, master=slot.master, time__gte=slot.time)
+                .order_by('time')[:needed + buf]
+            )
+            for w in block:
+                if not w.is_booked:
+                    w.is_booked = True
+                    w.save(update_fields=['is_booked'])
 
             booking = form.save(commit=False)
             booking.slot = slot

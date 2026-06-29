@@ -21,6 +21,13 @@ class Master(models.Model):
     photo = models.ImageField(upload_to='masters/', blank=True, verbose_name='Фото')
     description = models.TextField(blank=True, verbose_name='Описание')
     is_active = models.BooleanField(default=True, verbose_name='Активен')
+    work_start = models.TimeField(default=datetime.time(9, 0), verbose_name='Начало рабочего дня')
+    work_end = models.TimeField(default=datetime.time(21, 0), verbose_name='Конец рабочего дня')
+    work_days = models.CharField(
+        max_length=20, default='0,1,2,3,4,5,6', verbose_name='Рабочие дни',
+        help_text='Дни недели через запятую: 0=Пн, 1=Вт, 2=Ср, 3=Чт, 4=Пт, 5=Сб, 6=Вс',
+    )
+    buffer_minutes = models.PositiveIntegerField(default=0, verbose_name='Буфер между записями (мин)')
 
     class Meta:
         verbose_name = 'Мастер'
@@ -28,6 +35,59 @@ class Master(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def working_weekdays(self):
+        out = set()
+        for p in (self.work_days or '').split(','):
+            p = p.strip()
+            if p.isdigit():
+                out.add(int(p))
+        return out
+
+    @property
+    def buffer_slots(self):
+        return math.ceil(self.buffer_minutes / 30) if self.buffer_minutes else 0
+
+    def is_off(self, date):
+        return self.time_off.filter(date_from__lte=date, date_to__gte=date).exists()
+
+    def works_on(self, date):
+        wd = self.working_weekdays
+        if wd and date.weekday() not in wd:
+            return False
+        return not self.is_off(date)
+
+    def fits_working_hours(self, start_time, duration_minutes):
+        """Помещается ли услуга длительностью N минут в рабочие часы мастера."""
+        base = datetime.date.today()
+        start_dt = datetime.datetime.combine(base, start_time)
+        end_dt = start_dt + datetime.timedelta(minutes=duration_minutes)
+        ws = datetime.datetime.combine(base, self.work_start)
+        we = datetime.datetime.combine(base, self.work_end)
+        return ws <= start_dt and end_dt <= we
+
+
+class MasterTimeOff(models.Model):
+    REASON_CHOICES = [
+        ('vacation', 'Отпуск'),
+        ('sick', 'Больничный'),
+        ('dayoff', 'Выходной'),
+        ('other', 'Другое'),
+    ]
+    master = models.ForeignKey('Master', on_delete=models.CASCADE, related_name='time_off', verbose_name='Мастер')
+    date_from = models.DateField(verbose_name='С')
+    date_to = models.DateField(verbose_name='По')
+    reason = models.CharField(max_length=20, choices=REASON_CHOICES, default='dayoff', verbose_name='Причина')
+    comment = models.CharField(max_length=300, blank=True, verbose_name='Комментарий')
+
+    class Meta:
+        ordering = ['-date_from']
+        verbose_name = 'Отсутствие мастера'
+        verbose_name_plural = 'Отсутствия мастеров'
+
+    def __str__(self):
+        return f'{self.master.name}: {self.date_from}–{self.date_to} ({self.get_reason_display()})'
 
 
 class Service(models.Model):
@@ -154,10 +214,12 @@ class Booking(models.Model):
         return f'/booking/cancel/{signed}/'
 
     def get_reserved_slots(self):
-        """Все слоты, занятые этой записью (с учётом длительности услуги)."""
+        """Слоты, занятые записью: длительность услуги + буфер мастера."""
+        m = self.master or self.slot.master
+        total = self.service.slot_count + (m.buffer_slots if m else 0)
         return TimeSlot.objects.filter(
             date=self.slot.date, master=self.slot.master, time__gte=self.slot.time
-        ).order_by('time')[:self.service.slot_count]
+        ).order_by('time')[:total]
 
     def release_slots(self):
         for s in self.get_reserved_slots():

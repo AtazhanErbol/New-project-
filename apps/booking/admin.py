@@ -1,7 +1,7 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 from unfold.admin import ModelAdmin, TabularInline
-from .models import Service, TimeSlot, Booking, Master, Client, generate_slots_for_master
+from .models import Service, TimeSlot, Booking, Master, Client, MasterTimeOff, generate_slots_for_master
 from django.http import HttpResponse
 import datetime
 import csv
@@ -20,6 +20,28 @@ class MasterAdmin(ModelAdmin):
             return mark_safe(f'<img src="{obj.photo.url}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">')
         return mark_safe('<div style="width:40px;height:40px;border-radius:50%;background:#F5C6D0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">' + obj.name[0] + '</div>')
     photo_preview.short_description = 'Фото'
+
+
+@admin.register(MasterTimeOff)
+class MasterTimeOffAdmin(ModelAdmin):
+    list_display = ['master', 'date_from', 'date_to', 'reason', 'comment']
+    list_filter = ['reason', 'master']
+    date_hierarchy = 'date_from'
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        conflicts = Booking.objects.filter(
+            slot__master=obj.master,
+            slot__date__gte=obj.date_from,
+            slot__date__lte=obj.date_to,
+        ).exclude(status='cancelled').count()
+        if conflicts:
+            self.message_user(
+                request,
+                f'Внимание: у мастера «{obj.master.name}» в этот период уже есть активных записей: {conflicts}. '
+                f'Свяжитесь с клиентами для переноса.',
+                level=messages.WARNING,
+            )
 
 
 @admin.register(Service)
