@@ -4,18 +4,18 @@
         <img src="{{ site_settings.hero_image.url }}" alt="" class="hero__bg-img" loading="eager">
         <div class="hero__bg-overlay"></div>
     </div>
-    {% else %}
-    <div class="hero__particles"></div>
-    <div class="hero__overlay"></div>
     {% endif %}
     <div class="container hero__content">
-        <h1 class="hero__title" data-aos="fade-up"><span class="hero__typewriter" id="typewriter"></span></h1>
-        <p class="hero__subtitle" data-aos="fade-up" data-aos-delay="200">{{ site_settings.bio|truncatewords:15|default:"Профессиональный маникюр и педикюр в Астане" }}</p>
+        <span class="hero__eyebrow" data-aos="fade-up">Студия красоты · Астана</span>
+        <h1 class="hero__title" data-aos="fade-up" data-aos-delay="100">Красота<br>в каждой<br>детали</h1>
+        <p class="hero__typeline" data-aos="fade-up" data-aos-delay="200">Мы делаем — <span class="hero__typewriter" id="typewriter"></span></p>
+        <p class="hero__subtitle" data-aos="fade-up" data-aos-delay="300">{{ site_settings.bio|truncatewords:15|default:"Профессиональный маникюр и педикюр в Астане" }}</p>
         <div class="hero__buttons" data-aos="fade-up" data-aos-delay="400">
             <a href="#booking" class="btn btn--gold btn--lg">Записаться онлайн</a>
             <a href="#gallery" class="btn btn--outline btn--lg">Смотреть работы</a>
         </div>
     </div>
+    <span class="hero__wordmark" aria-hidden="true">{{ site_settings.logo_text|default:"by Kabylova" }}</span>
     {% if site_settings.promo_text %}
     <div class="hero__badge" data-aos="fade-left" data-aos-delay="600">
         <span>🎉</span> <span>{{ site_settings.promo_text }}</span>

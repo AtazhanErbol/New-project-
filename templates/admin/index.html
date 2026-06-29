@@ -19,13 +19,12 @@
   .bk-row span:first-child{color:#322F36}
   .bk-row span:last-child{color:rgba(50,47,54,.6);white-space:nowrap}
   @media(max-width:768px){.bk-cols{grid-template-columns:1fr}}
-  @media(prefers-color-scheme:dark){
-    .bk-dash{color:#e8e8ea}
-    .bk-card,.bk-panel{background:#1f1f23;border-color:rgba(255,255,255,.08)}
-    .bk-lbl,.bk-row span:last-child{color:rgba(255,255,255,.55)}
-    .bk-row{border-color:rgba(255,255,255,.08)}
-    .bk-row span:first-child{color:#e8e8ea}
-  }
+  .dark .bk-dash{color:#e8e8ea}
+  .dark .bk-card,.dark .bk-panel{background:#1f1f23;border-color:rgba(255,255,255,.08);box-shadow:none}
+  .dark .bk-lbl,.dark .bk-row span:last-child{color:rgba(255,255,255,.55)}
+  .dark .bk-row{border-color:rgba(255,255,255,.08)}
+  .dark .bk-row span:first-child{color:#e8e8ea}
+  .dark .bk-panel h3{color:#e8e8ea}
 </style>
 
 <div class="bk-dash">

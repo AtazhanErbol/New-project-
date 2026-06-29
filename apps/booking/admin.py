@@ -1,6 +1,7 @@
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 from unfold.admin import ModelAdmin, TabularInline
+from unfold.decorators import display
 from .models import Service, TimeSlot, Booking, Master, Client, MasterTimeOff, generate_slots_for_master
 from django.http import HttpResponse
 import datetime
@@ -78,7 +79,7 @@ class TimeSlotAdmin(ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(ModelAdmin):
-    list_display = ['id', 'colored_status', 'client_info', 'service_name', 'master_name', 'slot_info', 'created_short', 'email_badge']
+    list_display = ['id', 'status_label', 'client_info', 'service_name', 'master_name', 'slot_info', 'created_short', 'email_label']
     list_filter = ['status', 'service__category', 'master', 'slot__date']
     search_fields = ['client_name', 'client_phone', 'client_email']
     list_display_links = ['id']
@@ -88,20 +89,15 @@ class BookingAdmin(ModelAdmin):
     readonly_fields = ['cancel_token', 'created_at', 'email_sent']
     actions = ['mark_confirmed', 'mark_cancelled', 'export_to_csv']
 
-    def colored_status(self, obj):
-        colors = {
-            'pending': ('#FFF3CD', '#856404', 'Ожидает'),
-            'confirmed': ('#D4EDDA', '#155724', 'Подтверждена'),
-            'cancelled': ('#F8D7DA', '#721C24', 'Отменена'),
-            'completed': ('#E2E3E5', '#383D41', 'Завершена'),
-        }
-        bg, fg, label = colors.get(obj.status, ('#FFF', '#000', obj.status))
-        return mark_safe(f'<span style="background:{bg};color:{fg};padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;white-space:nowrap">{label}</span>')
-    colored_status.short_description = 'Статус'
-    colored_status.allow_tags = True
+    @display(description='Статус', label={
+        'Ожидает': 'warning', 'Подтверждена': 'success',
+        'Отменена': 'danger', 'Завершена': 'info',
+    })
+    def status_label(self, obj):
+        return obj.get_status_display()
 
     def client_info(self, obj):
-        return mark_safe(f'<div><strong>{obj.client_name}</strong><br><span style="color:#888;font-size:11px">{obj.client_phone}</span></div>')
+        return mark_safe(f'<div><strong>{obj.client_name}</strong><br><span style="opacity:.6;font-size:11px">{obj.client_phone}</span></div>')
     client_info.short_description = 'Клиент'
     client_info.allow_tags = True
 
@@ -127,12 +123,9 @@ class BookingAdmin(ModelAdmin):
         return obj.created_at.strftime('%d.%m %H:%M')
     created_short.short_description = 'Создано'
 
-    def email_badge(self, obj):
-        if obj.email_sent:
-            return mark_safe('<span style="background:#D4EDDA;color:#155724;padding:2px 8px;border-radius:8px;font-size:11px">Отправлено</span>')
-        return mark_safe('<span style="background:#F8D7DA;color:#721C24;padding:2px 8px;border-radius:8px;font-size:11px">Не отправлено</span>')
-    email_badge.short_description = 'Email'
-    email_badge.allow_tags = True
+    @display(description='Email', label={'Отправлено': 'success', 'Не отправлено': 'danger'})
+    def email_label(self, obj):
+        return 'Отправлено' if obj.email_sent else 'Не отправлено'
 
     @admin.action(description='Подтвердить выбранные')
     def mark_confirmed(self, request, queryset):
