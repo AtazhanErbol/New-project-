@@ -172,7 +172,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadSlots(date) {
         var c = document.getElementById('slotsContainer');
         if (!c) return;
-        c.innerHTML = '<p class="booking-slots__hint">Загрузка...</p>';
+        var sk = '';
+        for (var s = 0; s < 8; s++) sk += '<div class="skeleton"></div>';
+        c.innerHTML = sk;
         var masterId = document.getElementById('selectedMasterId').value;
         var svcInput = document.querySelector('.booking-service-card__input:checked');
         var url = '/booking/slots/?date=' + date;
