@@ -12,5 +12,5 @@ class ReviewAdmin(ModelAdmin):
     list_editable = ['is_published']
 
     def stars(self, obj):
-        return mark_safe(f'<span style="color:#C9A96E">{"★" * obj.rating}{"☆" * (5 - obj.rating)}</span>')
+        return mark_safe(f'<span style="color:#B76E79">{"★" * obj.rating}{"☆" * (5 - obj.rating)}</span>')
     stars.short_description = 'Рейтинг'

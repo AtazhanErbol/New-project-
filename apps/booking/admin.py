@@ -18,7 +18,7 @@ class MasterAdmin(ModelAdmin):
     def photo_preview(self, obj):
         if obj.photo:
             return mark_safe(f'<img src="{obj.photo.url}" style="width:40px;height:40px;border-radius:50%;object-fit:cover">')
-        return mark_safe('<div style="width:40px;height:40px;border-radius:50%;background:#F5C6D0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">' + obj.name[0] + '</div>')
+        return mark_safe('<div style="width:40px;height:40px;border-radius:50%;background:#EBC8CE;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">' + obj.name[0] + '</div>')
     photo_preview.short_description = 'Фото'
 
 
@@ -111,14 +111,14 @@ class BookingAdmin(ModelAdmin):
 
     def master_name(self, obj):
         if obj.master:
-            return mark_safe(f'<span style="color:#C9A96E;font-weight:600">{obj.master.name}</span>')
+            return mark_safe(f'<span style="color:#B76E79;font-weight:600">{obj.master.name}</span>')
         return '-'
     master_name.short_description = 'Мастер'
     master_name.allow_tags = True
 
     def slot_info(self, obj):
         if obj.slot:
-            return mark_safe(f'<div><strong>{obj.slot.date.strftime("%d.%m.%Y")}</strong><br><span style="color:#C9A96E;font-weight:600">{obj.slot.time.strftime("%H:%M")}</span></div>')
+            return mark_safe(f'<div><strong>{obj.slot.date.strftime("%d.%m.%Y")}</strong><br><span style="color:#B76E79;font-weight:600">{obj.slot.time.strftime("%H:%M")}</span></div>')
         return '-'
     slot_info.short_description = 'Дата и время'
     slot_info.allow_tags = True
