@@ -1,10 +1,11 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 from django.utils.safestring import mark_safe
 from .models import PortfolioItem
 
 
 @admin.register(PortfolioItem)
-class PortfolioAdmin(admin.ModelAdmin):
+class PortfolioAdmin(ModelAdmin):
     list_display = ['thumbnail', 'alt_text', 'category', 'master', 'created_at']
     list_filter = ['category', 'master']
     search_fields = ['alt_text']

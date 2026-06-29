@@ -1,10 +1,11 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 from django.utils.safestring import mark_safe
 from .models import Review
 
 
 @admin.register(Review)
-class ReviewAdmin(admin.ModelAdmin):
+class ReviewAdmin(ModelAdmin):
     list_display = ['client_name', 'stars', 'master', 'is_published', 'created_at']
     list_filter = ['is_published', 'rating', 'master']
     search_fields = ['client_name', 'text']

@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
-from .models import TimeSlot, Booking, Master, Service, slots_are_contiguous
+from .models import TimeSlot, Booking, Master, Service, Client, slots_are_contiguous
 from .forms import BookingForm
 import datetime
 
@@ -133,6 +133,9 @@ def submit_booking(request):
             booking.slot = slot
             booking.master = master or slot.master
             booking.consent_given_at = timezone.now()
+            booking.client = Client.get_or_create_for_booking(
+                booking.client_name, booking.client_phone, booking.client_email
+            )
             booking.save()
     except TimeSlot.DoesNotExist:
         messages.error(request, 'Это время уже занято.')

@@ -76,6 +76,43 @@ class TimeSlot(models.Model):
         return slot_dt < now
 
 
+class Client(models.Model):
+    name = models.CharField(max_length=200, verbose_name='Имя')
+    phone = models.CharField(max_length=20, verbose_name='Телефон')
+    email = models.EmailField(blank=True, verbose_name='Email')
+    notes = models.TextField(blank=True, verbose_name='Комментарий администратора')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создан')
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Клиент'
+        verbose_name_plural = 'Клиенты'
+
+    def __str__(self):
+        return f'{self.name} ({self.phone})'
+
+    @property
+    def visits_count(self):
+        return self.bookings.count()
+
+    @classmethod
+    def get_or_create_for_booking(cls, name, phone, email=''):
+        """Найти клиента по телефону или создать нового; обновить контакты."""
+        client = cls.objects.filter(phone=phone).first()
+        if client is None:
+            return cls.objects.create(name=name, phone=phone, email=email)
+        changed = False
+        if name and client.name != name:
+            client.name = name
+            changed = True
+        if email and client.email != email:
+            client.email = email
+            changed = True
+        if changed:
+            client.save()
+        return client
+
+
 class Booking(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Ожидает'),
@@ -85,6 +122,7 @@ class Booking(models.Model):
     ]
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='bookings', verbose_name='Услуга')
     master = models.ForeignKey(Master, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings', verbose_name='Мастер')
+    client = models.ForeignKey('Client', on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings', verbose_name='Клиент')
     slot = models.OneToOneField(TimeSlot, on_delete=models.CASCADE, related_name='booking', verbose_name='Слот')
     client_name = models.CharField(max_length=200, verbose_name='Имя клиента')
     client_phone = models.CharField(max_length=20, verbose_name='Телефон')

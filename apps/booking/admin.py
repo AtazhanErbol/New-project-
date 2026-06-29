@@ -1,13 +1,14 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-from .models import Service, TimeSlot, Booking, Master, generate_slots_for_master
+from unfold.admin import ModelAdmin, TabularInline
+from .models import Service, TimeSlot, Booking, Master, Client, generate_slots_for_master
 from django.http import HttpResponse
 import datetime
 import csv
 
 
 @admin.register(Master)
-class MasterAdmin(admin.ModelAdmin):
+class MasterAdmin(ModelAdmin):
     list_display = ['photo_preview', 'name', 'email', 'specialization', 'is_active']
     list_filter = ['is_active']
     search_fields = ['name', 'email']
@@ -22,7 +23,7 @@ class MasterAdmin(admin.ModelAdmin):
 
 
 @admin.register(Service)
-class ServiceAdmin(admin.ModelAdmin):
+class ServiceAdmin(ModelAdmin):
     list_display = ['thumbnail', 'name', 'category', 'duration_minutes', 'price_from', 'is_active', 'order']
     list_filter = ['category', 'is_active']
     search_fields = ['name']
@@ -38,7 +39,7 @@ class ServiceAdmin(admin.ModelAdmin):
 
 
 @admin.register(TimeSlot)
-class TimeSlotAdmin(admin.ModelAdmin):
+class TimeSlotAdmin(ModelAdmin):
     list_display = ['id', 'date', 'time', 'master', 'is_booked']
     list_filter = ['date', 'is_booked', 'master']
     list_display_links = ['id']
@@ -54,7 +55,7 @@ class TimeSlotAdmin(admin.ModelAdmin):
 
 
 @admin.register(Booking)
-class BookingAdmin(admin.ModelAdmin):
+class BookingAdmin(ModelAdmin):
     list_display = ['id', 'colored_status', 'client_info', 'service_name', 'master_name', 'slot_info', 'created_short', 'email_badge']
     list_filter = ['status', 'service__category', 'master', 'slot__date']
     search_fields = ['client_name', 'client_phone', 'client_email']
@@ -139,4 +140,46 @@ class BookingAdmin(admin.ModelAdmin):
                 b.created_at.strftime('%d.%m.%Y %H:%M'),
                 'Да' if b.email_sent else 'Нет'
             ])
+        return response
+
+
+class ClientBookingInline(TabularInline):
+    model = Booking
+    fk_name = 'client'
+    extra = 0
+    can_delete = False
+    show_change_link = True
+    fields = ['created_at', 'service', 'master', 'slot', 'status']
+    readonly_fields = ['created_at', 'service', 'master', 'slot', 'status']
+    ordering = ['-created_at']
+    verbose_name = 'Запись'
+    verbose_name_plural = 'История записей'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Client)
+class ClientAdmin(ModelAdmin):
+    list_display = ['name', 'phone', 'email', 'visits', 'created_at']
+    search_fields = ['name', 'phone', 'email']
+    ordering = ['name']
+    readonly_fields = ['created_at']
+    inlines = [ClientBookingInline]
+    actions = ['export_clients_csv']
+
+    def visits(self, obj):
+        return obj.visits_count
+    visits.short_description = 'Визитов'
+
+    @admin.action(description='Экспорт клиентов в CSV')
+    def export_clients_csv(self, request, queryset):
+        response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+        response['Content-Disposition'] = 'attachment; filename="clients.csv"'
+        response.write('﻿')
+        writer = csv.writer(response, delimiter=';')
+        writer.writerow(['Имя', 'Телефон', 'Email', 'Визитов', 'Создан', 'Комментарий'])
+        for c in queryset:
+            writer.writerow([c.name, c.phone, c.email, c.visits_count,
+                             c.created_at.strftime('%d.%m.%Y'), c.notes])
         return response

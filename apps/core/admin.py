@@ -1,4 +1,5 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 from .models import SiteSettings
 
 admin.site.site_header = 'Beauty by Kabylova — Админ-панель'
@@ -7,7 +8,7 @@ admin.site.index_title = 'Управление сайтом'
 
 
 @admin.register(SiteSettings)
-class SiteSettingsAdmin(admin.ModelAdmin):
+class SiteSettingsAdmin(ModelAdmin):
     fieldsets = [
         ('Основное', {'fields': ['site_name', 'logo_text', 'logo_image', 'hero_image', 'about_image', 'bio']}),
         ('Контакты', {'fields': ['phone', 'email', 'address', 'working_hours']}),

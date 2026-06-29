@@ -11,7 +11,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-change-me-in-prod
 DEBUG = env.bool('DEBUG', default=True)
 
 INSTALLED_APPS = [
-    'jazzmin',
+    'unfold',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -90,7 +90,7 @@ STORAGES = {
     'default': { 'BACKEND': 'django.core.files.storage.FileSystemStorage' },
     'staticfiles': {
         # Хэш-имена (сброс кэша) без сжатия и без 500 на отсутствующих
-        # в манифесте путях jazzmin (см. config/storages.py).
+        # в манифесте путях admin-темы (см. config/storages.py).
         'BACKEND': 'config.storages.LenientManifestStaticFilesStorage',
     },
 }
@@ -125,41 +125,28 @@ LOGGING = {
     },
 }
 
-JAZZMIN_SETTINGS = {
-    'site_title': 'Beauty by Kabylova',
-    'site_header': 'Kabylova',
-    'site_brand': 'Beauty by Kabylova',
-    'welcome_sign': 'Управление сайтом Beauty by Kabylova',
-    'copyright': 'Beauty by Kabylova',
-    'search_model': ['booking.Booking', 'booking.Service'],
-    'order_with_respect_to': ['core', 'booking', 'portfolio', 'reviews'],
-    'icons': {
-        'auth.user': 'fas fa-user',
-        'auth.Group': 'fas fa-users',
-        'core.SiteSettings': 'fas fa-cog',
-        'booking.Master': 'fas fa-user-tie',
-        'booking.Service': 'fas fa-spa',
-        'booking.TimeSlot': 'fas fa-clock',
-        'booking.Booking': 'fas fa-calendar-check',
-    },
-    'show_ui_builder': False,
-    'changeform_format': 'horizontal_tabs',
-}
-
-JAZZMIN_UI_TWEAKS = {
-    'navbar': 'navbar-dark',
-    'navbar_fixed': True,
-    'theme': 'flatly',
-    'no_navbar_border': True,
-    'brand_colour': 'navbar-dark',
-    'accent': 'accent-warning',
-    'button_classes': {
-        'primary': 'btn-warning',
-        'secondary': 'btn-secondary',
-        'info': 'btn-info',
-        'warning': 'btn-warning',
-        'danger': 'btn-danger',
-        'success': 'btn-success',
+UNFOLD = {
+    'SITE_TITLE': 'Beauty by Kabylova',
+    'SITE_HEADER': 'Beauty by Kabylova',
+    'SITE_SUBHEADER': 'Управление салоном',
+    'SHOW_HISTORY': True,
+    'SHOW_VIEW_ON_SITE': True,
+    'DASHBOARD_CALLBACK': 'apps.core.dashboard.dashboard_callback',
+    'COLORS': {
+        # Фирменный роуз-голд (#B76E79) — шкала оттенков для Unfold (RGB).
+        'primary': {
+            '50': '250 244 245',
+            '100': '245 230 233',
+            '200': '235 200 206',
+            '300': '222 170 179',
+            '400': '205 140 151',
+            '500': '183 110 121',
+            '600': '156 90 102',
+            '700': '130 74 85',
+            '800': '105 60 69',
+            '900': '84 48 56',
+            '950': '50 28 33',
+        },
     },
 }
 
