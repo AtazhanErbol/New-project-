@@ -16,6 +16,7 @@ CATEGORY_CHOICES = [
 
 class Master(models.Model):
     name = models.CharField(max_length=200, verbose_name='Имя мастера')
+    email = models.EmailField(blank=True, verbose_name='Email для уведомлений о записях')
     specialization = models.CharField(max_length=300, blank=True, verbose_name='Специализация')
     photo = models.ImageField(upload_to='masters/', blank=True, verbose_name='Фото')
     description = models.TextField(blank=True, verbose_name='Описание')

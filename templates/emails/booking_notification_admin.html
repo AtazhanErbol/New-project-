@@ -10,6 +10,7 @@
 <tr><td style="border-bottom:1px solid #eee;"><strong>Телефон:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.client_phone }}</td></tr>
 <tr><td style="border-bottom:1px solid #eee;"><strong>Email:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.client_email }}</td></tr>
 <tr><td style="border-bottom:1px solid #eee;"><strong>Услуга:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.service.name }}</td></tr>
+{% if booking.master %}<tr><td style="border-bottom:1px solid #eee;"><strong>Мастер:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.master.name }}</td></tr>{% endif %}
 <tr><td style="border-bottom:1px solid #eee;"><strong>Дата:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.slot.date|date:"d.m.Y" }}</td></tr>
 <tr><td style="border-bottom:1px solid #eee;"><strong>Время:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.slot.time|time:"H:i" }}</td></tr>
 <tr><td><strong>Комментарий:</strong></td><td>{{ booking.comment|default:"—" }}</td></tr>

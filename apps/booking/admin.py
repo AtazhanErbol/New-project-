@@ -8,9 +8,9 @@ import csv
 
 @admin.register(Master)
 class MasterAdmin(admin.ModelAdmin):
-    list_display = ['photo_preview', 'name', 'specialization', 'is_active']
+    list_display = ['photo_preview', 'name', 'email', 'specialization', 'is_active']
     list_filter = ['is_active']
-    search_fields = ['name']
+    search_fields = ['name', 'email']
     list_display_links = ['name']
     list_editable = ['is_active']
 

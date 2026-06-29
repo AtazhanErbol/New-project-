@@ -171,13 +171,20 @@ def _send_confirmation_email(booking):
     except Exception:
         logger.exception('Не удалось отправить письмо клиенту для booking id=%s', booking.id)
 
+    # Уведомление о записи: конкретному мастеру (если у него задан email)
+    # и общему админу. Дубли убираем.
+    recipients = []
+    if booking.master and booking.master.email:
+        recipients.append(booking.master.email)
     admin_email = getattr(settings, 'ADMIN_EMAIL', '')
-    if admin_email:
+    if admin_email and admin_email not in recipients:
+        recipients.append(admin_email)
+    if recipients:
         try:
             html_admin = render_to_string('emails/booking_notification_admin.html', {'booking': booking})
-            send_mail('Новая запись', '', from_email, [admin_email], html_message=html_admin)
+            send_mail('Новая запись', '', from_email, recipients, html_message=html_admin)
         except Exception:
-            logger.exception('Не удалось отправить письмо администратору для booking id=%s', booking.id)
+            logger.exception('Не удалось отправить письмо мастеру/админу для booking id=%s', booking.id)
 
     booking.email_sent = client_sent
     booking.save(update_fields=['email_sent'])
