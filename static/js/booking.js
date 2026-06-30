@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var cal = document.getElementById('flatpickr');
     if (cal && typeof flatpickr !== 'undefined') {
         flatpickr(cal, {
-            locale: 'ru', minDate: 'today', dateFormat: 'Y-m-d',
+            locale: 'ru', minDate: 'today', maxDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), dateFormat: 'Y-m-d',
             onChange: function(sel, dateStr) { loadSlots(dateStr); }
         });
     }

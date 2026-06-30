@@ -252,6 +252,21 @@ def generate_slots_for_master(master):
     return count
 
 
+def ensure_slots_for_date(master, date):
+    """Лениво создаёт слоты мастера на конкретную дату, если их ещё нет.
+
+    Позволяет не генерировать слоты вручную: при выборе любой даты в форме
+    записи недостающие слоты создаются автоматически.
+    """
+    if TimeSlot.objects.filter(master=master, date=date).exists():
+        return
+    times = [datetime.time(h, m) for h in range(9, 22) for m in (0, 30)]
+    TimeSlot.objects.bulk_create(
+        [TimeSlot(master=master, date=date, time=t) for t in times],
+        ignore_conflicts=True,
+    )
+
+
 @receiver(post_save, sender=Master)
 def auto_generate_slots(sender, instance, created, **kwargs):
     if created and instance.is_active:

@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
-from .models import TimeSlot, Booking, Master, Service, Client, slots_are_contiguous
+from .models import TimeSlot, Booking, Master, Service, Client, slots_are_contiguous, ensure_slots_for_date
 from .forms import BookingForm
 import datetime
 
@@ -40,6 +40,9 @@ def get_available_slots(request):
     # Мастер не работает в этот день (выходной / отпуск / больничный) — слотов нет.
     if master and not master.works_on(date):
         return JsonResponse({'slots': []})
+    # Авто-создание слотов на выбранную дату (горизонт 90 дней) — без ручной генерации.
+    if master and timezone.localdate() <= date <= timezone.localdate() + datetime.timedelta(days=90):
+        ensure_slots_for_date(master, date)
 
     buf = master.buffer_slots if master else 0
 
