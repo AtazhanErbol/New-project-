@@ -55,7 +55,7 @@ a{text-decoration:none;color:inherit}
 .filter-btn.active,.filter-btn:hover{background:var(--chocolate);color:var(--white)}
 .services__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
 .service-card__inner{background:var(--white);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);transition:var(--transition);height:100%;display:flex;flex-direction:column}
-.service-card__img{width:100%;height:210px;object-fit:contain;background:var(--powder);padding:10px;border-radius:12px;margin-bottom:16px}
+.service-card__img{width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:16px}
 .service-card__icon{color:var(--gold);margin-bottom:16px}
 .service-card__title{font-size:20px;margin-bottom:8px}
 .service-card__desc{color:rgba(44,26,26,.7);font-size:15px;margin-bottom:16px;flex-grow:1}
@@ -77,8 +77,8 @@ a{text-decoration:none;color:inherit}
 .about__detail svg{color:var(--gold);flex-shrink:0}
 .gallery{padding:100px 0}
 .gallery__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-.gallery__item{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1;cursor:pointer;background:var(--powder)}
-.gallery__item img{width:100%;height:100%;object-fit:contain;transition:var(--transition)}
+.gallery__item{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1;cursor:pointer}
+.gallery__item img{width:100%;height:100%;object-fit:cover;transition:var(--transition)}
 .gallery__overlay{position:absolute;inset:0;background:rgba(50,47,54,.62);display:flex;align-items:center;justify-content:center;opacity:0;transition:var(--transition);color:var(--white);font-weight:600;font-size:14px}
 .gallery__item:hover .gallery__overlay{opacity:1}
 .gallery__item:hover img{transform:scale(1.05)}
@@ -124,7 +124,7 @@ a{text-decoration:none;color:inherit}
 .booking-service-card__input:checked+.booking-service-card__inner,.master-radio:checked+.booking-service-card__inner{border-color:var(--gold);box-shadow:0 4px 16px rgba(183,110,121,.2);background:var(--pink-soft)}
 .booking-service-card__name{display:block;font-weight:600;font-size:15px}
 .booking-service-card__price{display:block;color:var(--gold);font-weight:700;font-size:14px}
-.master-photo{width:100%;aspect-ratio:1;object-fit:contain;background:var(--powder);border-radius:12px;margin-bottom:10px}
+.master-photo{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;margin-bottom:10px}
 .master-photo--placeholder{display:flex;align-items:center;justify-content:center;background:var(--rose);color:var(--white);font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1}
 
 .booking-datetime{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start}
