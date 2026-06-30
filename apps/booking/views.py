@@ -227,3 +227,15 @@ def _send_confirmation_email(booking):
 
     booking.email_sent = client_sent
     booking.save(update_fields=['email_sent'])
+
+
+def send_client_confirmation_email(booking):
+    """Письмо клиенту при подтверждении записи мастером/админом."""
+    from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER or 'noreply@beauty.kz'
+    try:
+        html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking})
+        send_mail('Ваша запись подтверждена', '', from_email, [booking.client_email], html_message=html)
+        return True
+    except Exception:
+        logger.exception('Не удалось отправить подтверждение клиенту для booking id=%s', booking.id)
+        return False

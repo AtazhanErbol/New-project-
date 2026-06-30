@@ -86,8 +86,27 @@ class BookingAdmin(ModelAdmin):
     date_hierarchy = 'created_at'
     ordering = ['-created_at']
     list_per_page = 25
-    readonly_fields = ['cancel_token', 'created_at', 'email_sent']
+    readonly_fields = ['cancel_token', 'created_at', 'email_sent', 'whatsapp_confirm']
     actions = ['mark_confirmed', 'mark_cancelled', 'export_to_csv']
+
+    def whatsapp_confirm(self, obj):
+        digits = ''.join(c for c in (obj.client_phone or '') if c.isdigit())
+        if not digits:
+            return '-'
+        from urllib.parse import quote
+        msg = f'Здравствуйте, {obj.client_name}! Подтверждаем вашу запись: {obj.service.name}'
+        if obj.slot:
+            msg += f', {obj.slot.date.strftime("%d.%m.%Y")} в {obj.slot.time.strftime("%H:%M")}'
+        if obj.master:
+            msg += f', мастер {obj.master.name}'
+        msg += '. Адрес: г. Астана, ул. Байтурсынова 17/1. Ждём вас!'
+        url = f'https://wa.me/{digits}?text={quote(msg)}'
+        return mark_safe(
+            f'<a href="{url}" target="_blank" rel="noopener" '
+            f'style="display:inline-block;background:#25D366;color:#fff;padding:8px 16px;'
+            f'border-radius:8px;font-weight:600;text-decoration:none">Написать клиенту в WhatsApp</a>'
+        )
+    whatsapp_confirm.short_description = 'WhatsApp клиенту'
 
     @display(description='Статус', label={
         'Ожидает': 'warning', 'Подтверждена': 'success',
@@ -127,9 +146,18 @@ class BookingAdmin(ModelAdmin):
     def email_label(self, obj):
         return 'Отправлено' if obj.email_sent else 'Не отправлено'
 
-    @admin.action(description='Подтвердить выбранные')
+    @admin.action(description='Подтвердить выбранные (+ письмо клиенту)')
     def mark_confirmed(self, request, queryset):
-        queryset.update(status='confirmed')
+        from .views import send_client_confirmation_email
+        sent = 0
+        total = 0
+        for b in queryset:
+            b.status = 'confirmed'
+            b.save(update_fields=['status'])
+            total += 1
+            if send_client_confirmation_email(b):
+                sent += 1
+        self.message_user(request, f'Подтверждено записей: {total}, писем клиентам отправлено: {sent}')
 
     @admin.action(description='Отменить выбранные')
     def mark_cancelled(self, request, queryset):
