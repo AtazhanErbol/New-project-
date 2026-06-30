@@ -211,7 +211,7 @@ h1,h2,h3,h4{letter-spacing:-.025em}
 .hero__content{position:relative;z-index:2}
 .hero__eyebrow{display:inline-block;text-transform:uppercase;letter-spacing:.34em;font-size:12px;font-weight:600;color:var(--accent);margin-bottom:22px}
 .hero__title{font-size:clamp(44px,9vw,96px);letter-spacing:-.04em;line-height:.98;margin-bottom:20px}
-.hero__typeline{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(20px,3.2vw,32px);color:var(--graphite);margin-bottom:22px;min-height:1.3em}
+.hero__typeline{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(20px,3.2vw,32px);color:var(--graphite);margin-bottom:22px;line-height:1.3;min-height:2.7em}
 .hero__typewriter{color:var(--accent);font-style:normal}
 .hero__subtitle{font-size:clamp(15px,2vw,18px);max-width:42ch;letter-spacing:.01em;line-height:1.7}
 .hero__wordmark{position:absolute;right:-2vw;bottom:5vh;font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(64px,16vw,220px);line-height:.8;color:rgba(183,110,121,.07);white-space:nowrap;pointer-events:none;z-index:0}
