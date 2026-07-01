@@ -167,7 +167,8 @@ class BookingAdmin(ModelAdmin):
     slot_info.allow_tags = True
 
     def created_short(self, obj):
-        return obj.created_at.strftime('%d.%m %H:%M')
+        from django.utils import timezone
+        return timezone.localtime(obj.created_at).strftime('%d.%m %H:%M')
     created_short.short_description = 'Создано'
 
     @display(description='Email', label={'Отправлено': 'success', 'Не отправлено': 'danger'})
