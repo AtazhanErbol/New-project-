@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 import math
 import secrets
@@ -289,3 +289,18 @@ def ensure_slots_for_date(master, date):
 def auto_generate_slots(sender, instance, created, **kwargs):
     if created and instance.is_active:
         generate_slots_for_master(instance)
+
+
+@receiver(pre_delete, sender=Booking)
+def free_slots_on_booking_delete(sender, instance, **kwargs):
+    """При удалении активной записи освобождаем её слоты (с буфером).
+
+    Отменённые записи уже освободили слоты (и те могли быть заняты заново),
+    поэтому их не трогаем.
+    """
+    if instance.status == 'cancelled':
+        return
+    try:
+        instance.release_slots()
+    except Exception:
+        pass
