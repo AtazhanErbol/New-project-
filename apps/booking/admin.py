@@ -126,17 +126,9 @@ class BookingAdmin(ModelAdmin):
         return ro
 
     def whatsapp_confirm(self, obj):
-        digits = ''.join(c for c in (obj.client_phone or '') if c.isdigit())
-        if not digits:
+        url = obj.client_whatsapp_url()
+        if not url:
             return '-'
-        from urllib.parse import quote
-        msg = f'Здравствуйте, {obj.client_name}! Подтверждаем вашу запись: {obj.service.name}'
-        if obj.slot:
-            msg += f', {obj.slot.date.strftime("%d.%m.%Y")} в {obj.slot.time.strftime("%H:%M")}'
-        if obj.master:
-            msg += f', мастер {obj.master.name}'
-        msg += '. Адрес: г. Астана, ул. Байтурсынова 17/1. Ждём вас!'
-        url = f'https://wa.me/{digits}?text={quote(msg)}'
         return mark_safe(
             f'<a href="{url}" target="_blank" rel="noopener" '
             f'style="display:inline-block;background:#25D366;color:#fff;padding:8px 16px;'

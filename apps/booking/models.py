@@ -217,6 +217,20 @@ class Booking(models.Model):
         signed = signer.sign(self.cancel_token)
         return f'/booking/cancel/{signed}/'
 
+    def client_whatsapp_url(self):
+        """Ссылка wa.me на клиента с готовым текстом подтверждения."""
+        from urllib.parse import quote
+        digits = ''.join(c for c in (self.client_phone or '') if c.isdigit())
+        if not digits:
+            return ''
+        msg = f'Здравствуйте, {self.client_name}! Подтверждаем вашу запись: {self.service.name}'
+        if self.slot:
+            msg += f', {self.slot.date.strftime("%d.%m.%Y")} в {self.slot.time.strftime("%H:%M")}'
+        if self.master:
+            msg += f', мастер {self.master.name}'
+        msg += '. Адрес: г. Астана, ул. Байтурсынова 17/1. Ждём вас!'
+        return f'https://wa.me/{digits}?text={quote(msg)}'
+
     def get_reserved_slots(self):
         """Слоты, занятые записью: длительность услуги + буфер мастера."""
         m = self.master or self.slot.master

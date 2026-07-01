@@ -171,6 +171,7 @@ def submit_booking(request):
             booking = form.save(commit=False)
             booking.slot = slot
             booking.master = master or slot.master
+            booking.status = 'confirmed'  # без отдельного шага подтверждения
             booking.consent_given_at = timezone.now()
             booking.client = Client.get_or_create_for_booking(
                 booking.client_name, booking.client_phone, booking.client_email
@@ -228,8 +229,8 @@ def _send_confirmation_email(booking):
     from_email = _from_email()
     client_sent = False
     try:
-        html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking, 'confirmed': False})
-        send_mail('Заявка на запись принята', '', from_email, [booking.client_email], html_message=html)
+        html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking, 'confirmed': True})
+        send_mail('Ваша запись оформлена', '', from_email, [booking.client_email], html_message=html)
         client_sent = True
     except Exception:
         logger.exception('Не удалось отправить письмо клиенту для booking id=%s', booking.id)
