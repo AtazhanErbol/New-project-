@@ -208,19 +208,43 @@ def _from_email():
     return settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER or 'noreply@beauty.kz'
 
 
+def _clean_email(raw):
+    """Убирает пробелы/случайные хвостовые слэши и проверяет валидность адреса.
+
+    Один битый адрес (например, из-за опечатки в переменной окружения
+    ADMIN_EMAIL) иначе валит отправку письма целиком всем получателям.
+    """
+    from django.core.validators import validate_email
+    from django.core.exceptions import ValidationError
+    addr = (raw or '').strip().strip('\\/').strip()
+    if not addr:
+        return ''
+    try:
+        validate_email(addr)
+    except ValidationError:
+        logger.warning('Пропускаю некорректный email получателя: %r', raw)
+        return ''
+    return addr
+
+
 def _notify_recipients(booking):
     """Кому уходит уведомление о новой записи: мастер + email салона + ADMIN_EMAIL."""
     from apps.core.models import SiteSettings
-    recipients = []
-    if booking.master and booking.master.email:
-        recipients.append(booking.master.email)
     try:
-        site_email = (SiteSettings.load().email or '').strip()
+        site_email = SiteSettings.load().email
     except Exception:
         site_email = ''
-    for extra in (site_email, getattr(settings, 'ADMIN_EMAIL', '')):
-        if extra and extra not in recipients:
-            recipients.append(extra)
+
+    raw_addresses = [
+        booking.master.email if booking.master else '',
+        site_email,
+        getattr(settings, 'ADMIN_EMAIL', ''),
+    ]
+    recipients = []
+    for raw in raw_addresses:
+        addr = _clean_email(raw)
+        if addr and addr not in recipients:
+            recipients.append(addr)
     return recipients
 
 
