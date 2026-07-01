@@ -17,6 +17,10 @@ CATEGORY_CHOICES = [
 class Master(models.Model):
     name = models.CharField(max_length=200, verbose_name='Имя мастера')
     email = models.EmailField(blank=True, verbose_name='Email для уведомлений о записях')
+    user = models.OneToOneField(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='master_profile', verbose_name='Аккаунт для входа в кабинет',
+    )
     specialization = models.CharField(max_length=300, blank=True, verbose_name='Специализация')
     photo = models.ImageField(upload_to='masters/', blank=True, verbose_name='Фото')
     description = models.TextField(blank=True, verbose_name='Описание')

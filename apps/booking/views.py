@@ -203,30 +203,44 @@ def cancel_booking(request, signed_token):
     return redirect('/')
 
 
+def _from_email():
+    return settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER or 'noreply@beauty.kz'
+
+
+def _notify_recipients(booking):
+    """Кому уходит уведомление о новой записи: мастер + email салона + ADMIN_EMAIL."""
+    from apps.core.models import SiteSettings
+    recipients = []
+    if booking.master and booking.master.email:
+        recipients.append(booking.master.email)
+    try:
+        site_email = (SiteSettings.load().email or '').strip()
+    except Exception:
+        site_email = ''
+    for extra in (site_email, getattr(settings, 'ADMIN_EMAIL', '')):
+        if extra and extra not in recipients:
+            recipients.append(extra)
+    return recipients
+
+
 def _send_confirmation_email(booking):
-    from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER or 'noreply@beauty.kz'
+    """При создании записи: клиенту — 'заявка принята', мастеру и салону — уведомление."""
+    from_email = _from_email()
     client_sent = False
     try:
-        html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking})
-        send_mail('Подтверждение записи', '', from_email, [booking.client_email], html_message=html)
+        html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking, 'confirmed': False})
+        send_mail('Заявка на запись принята', '', from_email, [booking.client_email], html_message=html)
         client_sent = True
     except Exception:
         logger.exception('Не удалось отправить письмо клиенту для booking id=%s', booking.id)
 
-    # Уведомление о записи: конкретному мастеру (если у него задан email)
-    # и общему админу. Дубли убираем.
-    recipients = []
-    if booking.master and booking.master.email:
-        recipients.append(booking.master.email)
-    admin_email = getattr(settings, 'ADMIN_EMAIL', '')
-    if admin_email and admin_email not in recipients:
-        recipients.append(admin_email)
+    recipients = _notify_recipients(booking)
     if recipients:
         try:
             html_admin = render_to_string('emails/booking_notification_admin.html', {'booking': booking})
             send_mail('Новая запись', '', from_email, recipients, html_message=html_admin)
         except Exception:
-            logger.exception('Не удалось отправить письмо мастеру/админу для booking id=%s', booking.id)
+            logger.exception('Не удалось отправить уведомление мастеру/салону для booking id=%s', booking.id)
 
     booking.email_sent = client_sent
     booking.save(update_fields=['email_sent'])
@@ -234,10 +248,9 @@ def _send_confirmation_email(booking):
 
 def send_client_confirmation_email(booking):
     """Письмо клиенту при подтверждении записи мастером/админом."""
-    from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER or 'noreply@beauty.kz'
     try:
-        html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking})
-        send_mail('Ваша запись подтверждена', '', from_email, [booking.client_email], html_message=html)
+        html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking, 'confirmed': True})
+        send_mail('Ваша запись подтверждена', '', _from_email(), [booking.client_email], html_message=html)
         return True
     except Exception:
         logger.exception('Не удалось отправить подтверждение клиенту для booking id=%s', booking.id)

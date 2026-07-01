@@ -3,10 +3,10 @@
 <body style="margin:0;padding:0;background:#FAF7F2;font-family:Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F2;padding:40px 20px;"><tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;">
-<tr><td style="background:linear-gradient(135deg,#F5C6D0,#C9A96E);padding:32px;text-align:center;"><h1 style="margin:0;color:#fff;font-size:24px;">Запись подтверждена!</h1></td></tr>
+<tr><td style="background:linear-gradient(135deg,#EBC8CE,#B76E79);padding:32px;text-align:center;"><h1 style="margin:0;color:#fff;font-size:24px;">{% if confirmed %}Запись подтверждена!{% else %}Заявка принята!{% endif %}</h1></td></tr>
 <tr><td style="padding:32px;">
-<p style="color:#2C1A1A;font-size:16px;">Здравствуйте, <strong>{{ booking.client_name }}</strong>!</p>
-<p style="color:#2C1A1A;font-size:16px;">Ваша запись создана:</p>
+<p style="color:#322F36;font-size:16px;">Здравствуйте, <strong>{{ booking.client_name }}</strong>!</p>
+<p style="color:#322F36;font-size:16px;">{% if confirmed %}Ваша запись подтверждена:{% else %}Мы получили вашу заявку — она ожидает подтверждения. Детали:{% endif %}</p>
 <table width="100%" cellpadding="12" cellspacing="0" style="background:#FAF7F2;border-radius:12px;margin:20px 0;">
 <tr><td style="border-bottom:1px solid #eee;"><strong>Услуга:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.service.name }}</td></tr>
 <tr><td style="border-bottom:1px solid #eee;"><strong>Дата:</strong></td><td style="border-bottom:1px solid #eee;">{{ booking.slot.date|date:"d.m.Y" }}</td></tr>

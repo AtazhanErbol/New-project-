@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.db.models import Q
 from django.utils.safestring import mark_safe
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.decorators import display
@@ -88,6 +89,41 @@ class BookingAdmin(ModelAdmin):
     list_per_page = 25
     readonly_fields = ['cancel_token', 'created_at', 'email_sent', 'whatsapp_confirm']
     actions = ['mark_confirmed', 'mark_cancelled', 'export_to_csv']
+
+    # --- Кабинет мастера: мастер видит только свои записи ---
+    def _is_master(self, request):
+        return Master.objects.filter(user=request.user).exists()
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        m = Master.objects.filter(user=request.user).first()
+        if m:
+            return qs.filter(Q(master=m) | Q(slot__master=m)).distinct()
+        return qs.none()
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser or self._is_master(request)
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_superuser or self._is_master(request)
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser or self._is_master(request)
+
+    def has_add_permission(self, request):
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def get_readonly_fields(self, request, obj=None):
+        ro = list(super().get_readonly_fields(request, obj))
+        if not request.user.is_superuser:
+            ro += ['service', 'master', 'slot', 'client', 'client_name',
+                   'client_phone', 'client_email', 'consent_given_at']
+        return ro
 
     def whatsapp_confirm(self, obj):
         digits = ''.join(c for c in (obj.client_phone or '') if c.isdigit())
