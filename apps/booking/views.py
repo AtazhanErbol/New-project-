@@ -1,4 +1,5 @@
 import logging
+import time
 
 from django.shortcuts import redirect, get_object_or_404
 from django.http import JsonResponse
@@ -210,6 +211,25 @@ def _from_email():
     return settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER or 'noreply@beauty.kz'
 
 
+def _send_html_email(subject, html, from_email, recipients, log_context):
+    """Отправляет письмо с одной повторной попыткой при сбое.
+
+    SMTP-соединение к Gmail иногда рвётся из-за временных сетевых сбоев —
+    один повтор через секунду покрывает почти все такие случаи без
+    усложнения логики бесконечными ретраями.
+    """
+    for attempt in (1, 2):
+        try:
+            send_mail(subject, '', from_email, recipients, html_message=html)
+            return True
+        except Exception:
+            if attempt == 1:
+                time.sleep(1)
+            else:
+                logger.exception('Не удалось отправить письмо (%s) после повтора', log_context)
+    return False
+
+
 def _clean_email(raw):
     """Убирает пробелы/случайные хвостовые слэши и проверяет валидность адреса.
 
@@ -253,21 +273,19 @@ def _notify_recipients(booking):
 def _send_confirmation_email(booking):
     """При создании записи: клиенту — 'заявка принята', мастеру и салону — уведомление."""
     from_email = _from_email()
-    client_sent = False
-    try:
-        html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking, 'confirmed': True})
-        send_mail('Ваша запись оформлена', '', from_email, [booking.client_email], html_message=html)
-        client_sent = True
-    except Exception:
-        logger.exception('Не удалось отправить письмо клиенту для booking id=%s', booking.id)
+    html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking, 'confirmed': True})
+    client_sent = _send_html_email(
+        'Ваша запись оформлена', html, from_email, [booking.client_email],
+        f'клиенту, booking id={booking.id}',
+    )
 
     recipients = _notify_recipients(booking)
     if recipients:
-        try:
-            html_admin = render_to_string('emails/booking_notification_admin.html', {'booking': booking})
-            send_mail('Новая запись', '', from_email, recipients, html_message=html_admin)
-        except Exception:
-            logger.exception('Не удалось отправить уведомление мастеру/салону для booking id=%s', booking.id)
+        html_admin = render_to_string('emails/booking_notification_admin.html', {'booking': booking})
+        _send_html_email(
+            'Новая запись', html_admin, from_email, recipients,
+            f'мастеру/салону, booking id={booking.id}',
+        )
 
     booking.email_sent = client_sent
     booking.save(update_fields=['email_sent'])
@@ -275,10 +293,8 @@ def _send_confirmation_email(booking):
 
 def send_client_confirmation_email(booking):
     """Письмо клиенту при подтверждении записи мастером/админом."""
-    try:
-        html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking, 'confirmed': True})
-        send_mail('Ваша запись подтверждена', '', _from_email(), [booking.client_email], html_message=html)
-        return True
-    except Exception:
-        logger.exception('Не удалось отправить подтверждение клиенту для booking id=%s', booking.id)
-        return False
+    html = render_to_string('emails/booking_confirmation_client.html', {'booking': booking, 'confirmed': True})
+    return _send_html_email(
+        'Ваша запись подтверждена', html, _from_email(), [booking.client_email],
+        f'подтверждение клиенту, booking id={booking.id}',
+    )
