@@ -182,6 +182,8 @@ def submit_booking(request):
         return redirect('/#booking')
 
     _send_confirmation_email(booking)
+    if not booking.email_sent:
+        return redirect('/?booking=ok&email=fail')
     return redirect('/?booking=ok')
 
 

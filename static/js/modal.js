@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var overlay = document.getElementById('bookingModal');
     if (params.get('booking') === 'ok') {
         if (overlay) { overlay.classList.add('active'); overlay.style.display = 'flex'; }
+        if (params.get('email') === 'fail') {
+            var warn = document.getElementById('modalEmailWarning');
+            if (warn) warn.style.display = 'block';
+        }
         window.history.replaceState(null, null, window.location.pathname + '#booking');
     }
     var closeBtn = document.getElementById('modalClose');
