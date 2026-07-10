@@ -1,4 +1,4 @@
-# Деплой на VPS (PS.kz) с доменом devbench.shop
+# Деплой на VPS (PS.kz) — сайт на beauty.devbench.shop
 
 Пошаговая инструкция. Выполняй по порядку, **по одной команде**, проверяя результат.
 Предполагается VPS с **Ubuntu 22.04 или 24.04** (команды одинаковые) и доступом
@@ -13,14 +13,14 @@
 ## Шаг 1. Направить домен на сервер (DNS)
 
 1. Узнай **IP-адрес** своего VPS (в кабинете PS.kz, раздел с сервером).
-2. В управлении доменом `devbench.shop` (DNS-записи) создай две A-записи:
-   - `@`  → `IP_твоего_сервера`
-   - `www` → `IP_твоего_сервера`
+2. В управлении доменом `devbench.shop` (DNS-записи) создай A-запись
+   для поддомена:
+   - Имя: `beauty` → Значение: `IP_твоего_сервера`
 3. Подожди 10–30 минут, пока DNS обновится. Проверить можно с любого компьютера:
    ```
-   ping devbench.shop
+   ping beauty.devbench.shop
    ```
-   Должен отвечать IP твоего сервера. **Пока это не так — SSL на шаге 8 не получится.**
+   Должен отвечать IP твоего сервера. **Пока это не так — SSL на шаге 9 не получится.**
 
 ---
 
@@ -72,7 +72,7 @@ nano .env
   ```
   python3 -c "import secrets; print(secrets.token_urlsafe(50))"
   ```
-- `ALLOWED_HOSTS=devbench.shop,www.devbench.shop`
+- `ALLOWED_HOSTS=beauty.devbench.shop`
 - `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` (пароль приложения Gmail), `ADMIN_EMAIL`.
 
 Сохрани: `Ctrl+O`, `Enter`, `Ctrl+X`.
@@ -106,8 +106,8 @@ systemctl status gunicorn
 ## Шаг 8. Настроить nginx
 
 ```
-cp deploy/nginx-devbench.conf /etc/nginx/sites-available/devbench.shop
-ln -s /etc/nginx/sites-available/devbench.shop /etc/nginx/sites-enabled/
+cp deploy/nginx-devbench.conf /etc/nginx/sites-available/beauty.devbench.shop
+ln -s /etc/nginx/sites-available/beauty.devbench.shop /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 nginx -t
 systemctl restart nginx
@@ -120,20 +120,24 @@ systemctl restart nginx
 
 DNS уже должен указывать на сервер (Шаг 1). Выполни:
 ```
-certbot --nginx -d devbench.shop -d www.devbench.shop
+certbot --nginx -d beauty.devbench.shop
 ```
 На вопросы: укажи email, согласись с условиями, при вопросе о редиректе выбери
 **2 (Redirect)**. Certbot сам получит сертификат и настроит https.
 
-Открой `https://devbench.shop` — сайт должен открыться с замком 🔒.
+Открой `https://beauty.devbench.shop` — сайт должен открыться с замком 🔒.
 
 ---
 
 ## Шаг 10. Проверить
 
-- `https://devbench.shop` — сайт открывается.
-- `https://devbench.shop/admin/` — заходит под созданным суперюзером.
+- `https://beauty.devbench.shop` — сайт открывается.
+- `https://beauty.devbench.shop/admin/` — заходит под созданным суперюзером.
 - Сделай тестовую запись → проверь почту.
+
+Главный домен `devbench.shop` остаётся свободным — на него (и на другие
+поддомены) можно позже посадить другие проекты: новая A-запись в DNS,
+свой конфиг в sites-available со своим `server_name` и портом, свой certbot.
 
 ---
 
