@@ -92,13 +92,17 @@ class BookingAdmin(ModelAdmin):
 
     # --- Кабинет мастера: мастер видит только свои записи ---
     def _is_master(self, request):
+        if not request.user.is_authenticated:
+            return False
         return Master.objects.filter(user=request.user).exists()
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             return qs
-        m = Master.objects.filter(user=request.user).first()
+        m = None
+        if request.user.is_authenticated:
+            m = Master.objects.filter(user=request.user).first()
         if m:
             return qs.filter(Q(master=m) | Q(slot__master=m)).distinct()
         return qs.none()
