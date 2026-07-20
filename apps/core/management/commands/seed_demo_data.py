@@ -49,17 +49,17 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         settings_obj = SiteSettings.load()
-        settings_obj.site_name = 'Beauty by Kabylova'
-        settings_obj.logo_text = 'by Kabylova'
+        settings_obj.site_name = 'Aurora Beauty Studio'
+        settings_obj.logo_text = 'Aurora'
         settings_obj.phone = '+7 (701) 234-56-78'
         settings_obj.address = 'г. Астана, ул. Байтурсынова 17/1'
         settings_obj.working_hours = 'Пн–Сб: 9:00–21:00, Вс: выходной'
         settings_obj.promo_text = 'Скидка 15% на первое посещение!'
-        settings_obj.instagram_url = 'https://www.instagram.com/by_kabylova'
+        settings_obj.instagram_url = 'https://www.instagram.com/aurora.beauty'
         settings_obj.whatsapp = '+77012345678'
-        settings_obj.telegram = 'by_kabylova'
+        settings_obj.telegram = 'aurora.beauty'
         settings_obj.bio = (
-            'Beauty by Kabylova — студия маникюра и педикюра в Астане. '
+            'Aurora Beauty Studio — студия маникюра и педикюра в Астане. '
             'Мы создаём аккуратный, стойкий и стильный нейл-дизайн, используя только '
             'качественные материалы и строго соблюдая стандарты стерилизации. '
             'Каждая клиентка для нас особенная — поэтому мы уделяем время, чтобы '
@@ -68,17 +68,17 @@ class Command(BaseCommand):
         settings_obj.years_experience = 7
         settings_obj.clients_count = 1200
         settings_obj.works_count = 850
-        settings_obj.email = 'info@bykabylova.kz'
+        settings_obj.email = 'info@aurora-beauty.kz'
         settings_obj.footer_text = 'Все права защищены'
         if not settings_obj.hero_image:
-            settings_obj.hero_image = make_placeholder('hero.jpg', 1600, 900, 'Beauty by Kabylova', GOLD, ROSE)
+            settings_obj.hero_image = make_placeholder('hero.jpg', 1600, 900, 'Aurora Beauty Studio', GOLD, ROSE)
         if not settings_obj.about_image:
             settings_obj.about_image = make_placeholder('about.jpg', 800, 1000, 'О мастере', CHOCOLATE, GOLD)
         settings_obj.save()
         self.stdout.write(self.style.SUCCESS('Настройки сайта обновлены.'))
 
         masters_data = [
-            ('Алина Кабылова', 'Мастер маникюра и дизайна ногтей', 'manicure',
+            ('Алина Ким', 'Мастер маникюра и дизайна ногтей', 'manicure',
              'Более 7 лет создаю аккуратный и стойкий маникюр. Специализируюсь на сложном дизайне и укреплении гелем.'),
             ('Марина Сатпаева', 'Мастер педикюра и SPA-ухода', 'pedicure',
              'Эксперт по аппаратному педикюру и уходу за стопами. Использую только сертифицированные материалы.'),
@@ -97,7 +97,7 @@ class Command(BaseCommand):
             masters[name] = master
         self.stdout.write(self.style.SUCCESS(f'Мастеров: {Master.objects.count()}'))
 
-        alina = masters['Алина Кабылова']
+        alina = masters['Алина Ким']
         marina = masters['Марина Сатпаева']
 
         services_data = [

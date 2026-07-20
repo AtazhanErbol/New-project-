@@ -2,8 +2,8 @@ from django.contrib import admin
 from unfold.admin import ModelAdmin
 from .models import SiteSettings
 
-admin.site.site_header = 'Beauty by Kabylova — Админ-панель'
-admin.site.site_title = 'Beauty by Kabylova'
+admin.site.site_header = 'Aurora Beauty Studio — Админ-панель'
+admin.site.site_title = 'Aurora Beauty Studio'
 admin.site.index_title = 'Управление сайтом'
 
 

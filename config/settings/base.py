@@ -127,8 +127,8 @@ LOGGING = {
 }
 
 UNFOLD = {
-    'SITE_TITLE': 'Beauty by Kabylova',
-    'SITE_HEADER': 'Beauty by Kabylova',
+    'SITE_TITLE': 'Aurora Beauty Studio',
+    'SITE_HEADER': 'Aurora Beauty Studio',
     'SITE_SUBHEADER': 'Управление салоном',
     'SHOW_HISTORY': True,
     'SHOW_VIEW_ON_SITE': True,
