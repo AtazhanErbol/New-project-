@@ -21,7 +21,8 @@
                         <label class="booking-service-card">
                             <input type="radio" name="master_radio" value="{{ master.id }}" class="master-radio">
                             <div class="booking-service-card__inner">
-                                {% if master.photo %}<img src="{{ master.photo.url }}" alt="{{ master.name }}" class="master-photo">{% endif %}
+                                {% if master.photo %}<img src="{{ master.photo.url }}" alt="{{ master.name }}" class="master-photo">
+                                {% else %}<div class="master-photo master-photo--placeholder">{{ master.name|first }}</div>{% endif %}
                                 <span class="booking-service-card__name">{{ master.name }}</span>
                                 <span class="booking-service-card__duration">{{ master.specialization }}</span>
                             </div>

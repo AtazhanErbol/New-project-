@@ -1,0 +1,16 @@
+<div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+        {% for i in "12" %}
+        {% for tag in site_settings.service_tags_list %}
+        <span>{{ tag }}</span><span class="marquee__dot">✦</span>
+        {% empty %}
+        <span>Маникюр</span><span class="marquee__dot">✦</span>
+        <span>Педикюр</span><span class="marquee__dot">✦</span>
+        <span>Дизайн ногтей</span><span class="marquee__dot">✦</span>
+        <span>Наращивание</span><span class="marquee__dot">✦</span>
+        <span>Гель-лак</span><span class="marquee__dot">✦</span>
+        <span>Уход</span><span class="marquee__dot">✦</span>
+        {% endfor %}
+        {% endfor %}
+    </div>
+</div>

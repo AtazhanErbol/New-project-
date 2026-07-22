@@ -9,10 +9,21 @@ document.addEventListener('DOMContentLoaded', function() {
     var burger = document.getElementById('burger');
     var mobileMenu = document.getElementById('mobileMenu');
     if (burger && mobileMenu) {
-        burger.addEventListener('click', function() { this.classList.toggle('active'); mobileMenu.classList.toggle('active'); });
+        burger.addEventListener('click', function() {
+            this.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            var open = mobileMenu.classList.contains('active');
+            document.body.classList.toggle('no-scroll', open);
+            if (navbar) navbar.classList.toggle('menu-open', open);
+        });
         var mlinks = mobileMenu.querySelectorAll('a');
         for (var i = 0; i < mlinks.length; i++) {
-            mlinks[i].addEventListener('click', function() { mobileMenu.classList.remove('active'); });
+            mlinks[i].addEventListener('click', function() {
+                mobileMenu.classList.remove('active');
+                burger.classList.remove('active');
+                document.body.classList.remove('no-scroll');
+                if (navbar) navbar.classList.remove('menu-open');
+            });
         }
     }
 
@@ -99,6 +110,30 @@ document.addEventListener('DOMContentLoaded', function() {
         if (target) target.classList.add('active');
     }
 
+    // FILTER SERVICES BY SELECTED MASTER
+    function filterServicesByMaster(masterId) {
+        fetch('/booking/services/?master_id=' + masterId)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var allowedIds = (data.services || []).map(function(s) { return String(s.id); });
+                var cards = document.querySelectorAll('#servicesList .booking-service-card');
+                for (var i = 0; i < cards.length; i++) {
+                    var input = cards[i].querySelector('.booking-service-card__input');
+                    var allowed = allowedIds.indexOf(input.value) !== -1;
+                    cards[i].style.display = allowed ? '' : 'none';
+                    if (!allowed && input.checked) input.checked = false;
+                }
+            })
+            .catch(function() {});
+    }
+
+    var masterRadios = document.querySelectorAll('.master-radio');
+    for (var i = 0; i < masterRadios.length; i++) {
+        masterRadios[i].addEventListener('change', function() {
+            if (this.checked) filterServicesByMaster(this.value);
+        });
+    }
+
     var nextBtns = document.querySelectorAll('.booking-next');
     for (var i = 0; i < nextBtns.length; i++) {
         nextBtns[i].addEventListener('click', function() {
@@ -129,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var cal = document.getElementById('flatpickr');
     if (cal && typeof flatpickr !== 'undefined') {
         flatpickr(cal, {
-            locale: 'ru', minDate: 'today', dateFormat: 'Y-m-d',
+            locale: 'ru', minDate: 'today', maxDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), dateFormat: 'Y-m-d',
             onChange: function(sel, dateStr) { loadSlots(dateStr); }
         });
     }
@@ -137,23 +172,33 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadSlots(date) {
         var c = document.getElementById('slotsContainer');
         if (!c) return;
-        c.innerHTML = '<p class="booking-slots__hint">Загрузка...</p>';
+        var sk = '';
+        for (var s = 0; s < 8; s++) sk += '<div class="skeleton"></div>';
+        c.innerHTML = sk;
         var masterId = document.getElementById('selectedMasterId').value;
+        var svcInput = document.querySelector('.booking-service-card__input:checked');
         var url = '/booking/slots/?date=' + date;
         if (masterId) url += '&master_id=' + masterId;
+        if (svcInput) url += '&service_id=' + svcInput.value;
         fetch(url)
             .then(function(r) { return r.json(); })
             .then(function(data) {
+                document.getElementById('selectedSlotId').value = '';
                 if (!data.slots || !data.slots.length) {
                     c.innerHTML = '<p class="booking-slots__hint">Нет свободных слотов</p>';
                     return;
                 }
                 var html = '';
                 for (var i = 0; i < data.slots.length; i++) {
-                    html += '<button type="button" class="slot-btn" data-slot-id="' + data.slots[i].id + '">' + data.slots[i].time + '</button>';
+                    var s = data.slots[i];
+                    var cls = 'slot-btn';
+                    var attrs = '';
+                    if (s.booked) { cls += ' slot-btn--booked'; attrs = 'disabled title="Уже занято"'; }
+                    else if (!s.available) { cls += ' slot-btn--unavailable'; attrs = 'disabled title="Недостаточно времени для услуги"'; }
+                    html += '<button type="button" class="' + cls + '" data-slot-id="' + s.id + '" ' + attrs + '>' + s.time + '</button>';
                 }
                 c.innerHTML = html;
-                var btns = c.querySelectorAll('.slot-btn');
+                var btns = c.querySelectorAll('.slot-btn:not([disabled])');
                 for (var i = 0; i < btns.length; i++) {
                     btns[i].addEventListener('click', function() {
                         var all = c.querySelectorAll('.slot-btn');
@@ -170,11 +215,25 @@ document.addEventListener('DOMContentLoaded', function() {
     var phone = document.querySelector('input[name="client_phone"]');
     if (phone) {
         phone.addEventListener('input', function(e) {
-            var v = e.target.value.replace(/\D/g, '');
- 
+            var input = e.target;
+            var digitsBefore = input.value.slice(0, input.selectionStart).replace(/\D/g, '').length;
+            var v = input.value.replace(/\D/g, '');
+            if (!v) { input.value = ''; return; }
             if (!v.startsWith('7')) v = '7' + v;
             v = v.substring(0, 11);
-            e.target.value = '+7 (' + v.substring(1, 4) + ') ' + v.substring(4, 7) + '-' + v.substring(7, 9) + '-' + v.substring(9, 11);
+
+            var formatted = '+7';
+            if (v.length > 1) formatted += ' (' + v.substring(1, 4);
+            if (v.length >= 4) formatted += ') ' + v.substring(4, 7);
+            if (v.length >= 7) formatted += '-' + v.substring(7, 9);
+            if (v.length >= 9) formatted += '-' + v.substring(9, 11);
+            input.value = formatted;
+
+            var pos = 0, seen = 0;
+            for (; pos < formatted.length && seen < digitsBefore; pos++) {
+                if (/\d/.test(formatted[pos])) seen++;
+            }
+            input.setSelectionRange(pos, pos);
         });
     }
     var cards = document.querySelectorAll('.service-card');

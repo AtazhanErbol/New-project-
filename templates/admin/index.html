@@ -1,0 +1,69 @@
+{% extends "unfold/layouts/base_simple.html" %}
+{% load i18n %}
+
+{% block content %}
+<style>
+  .bk-dash{--bk-accent:#B76E79;color:#322F36}
+  .bk-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:24px}
+  .bk-card{background:#fff;border:1px solid rgba(50,47,54,.08);border-radius:16px;padding:22px 20px;box-shadow:0 6px 20px rgba(60,40,45,.05)}
+  .bk-num{font-size:34px;font-weight:700;color:var(--bk-accent);line-height:1}
+  .bk-lbl{margin-top:8px;font-size:13px;color:rgba(50,47,54,.6)}
+  .bk-links{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+  .bk-links a{display:inline-block;padding:9px 18px;border-radius:50px;background:var(--bk-accent);color:#fff;font-size:14px;font-weight:600}
+  .bk-links a:hover{background:#9C5A66}
+  .bk-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .bk-panel{background:#fff;border:1px solid rgba(50,47,54,.08);border-radius:16px;padding:20px}
+  .bk-panel h3{margin:0 0 12px;font-size:16px}
+  .bk-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(50,47,54,.07);font-size:14px}
+  .bk-row:last-child{border-bottom:none}
+  .bk-row span:first-child{color:#322F36}
+  .bk-row span:last-child{color:rgba(50,47,54,.6);white-space:nowrap}
+  @media(max-width:768px){.bk-cols{grid-template-columns:1fr}}
+  .dark .bk-dash{color:#e8e8ea}
+  .dark .bk-card,.dark .bk-panel{background:#1f1f23;border-color:rgba(255,255,255,.08);box-shadow:none}
+  .dark .bk-lbl,.dark .bk-row span:last-child{color:rgba(255,255,255,.55)}
+  .dark .bk-row{border-color:rgba(255,255,255,.08)}
+  .dark .bk-row span:first-child{color:#e8e8ea}
+  .dark .bk-panel h3{color:#e8e8ea}
+</style>
+
+<div class="bk-dash">
+  <div class="bk-stats">
+    {% for s in stats %}
+    <div class="bk-card"><div class="bk-num">{{ s.value }}</div><div class="bk-lbl">{{ s.label }}</div></div>
+    {% endfor %}
+  </div>
+
+  <div class="bk-links">
+    <a href="{% url 'admin:booking_booking_changelist' %}">Записи</a>
+    <a href="{% url 'admin:booking_client_changelist' %}">Клиенты</a>
+    <a href="{% url 'admin:booking_master_changelist' %}">Мастера</a>
+    <a href="{% url 'admin:booking_service_changelist' %}">Услуги</a>
+    <a href="{% url 'admin:booking_timeslot_changelist' %}">Слоты</a>
+    <a href="{% url 'admin:reviews_review_changelist' %}">Отзывы</a>
+    <a href="{% url 'admin:core_sitesettings_changelist' %}">Настройки</a>
+  </div>
+
+  <div class="bk-cols">
+    <div class="bk-panel">
+      <h3>Ближайшие записи</h3>
+      {% for b in upcoming_bookings %}
+      <div class="bk-row">
+        <span>{{ b.slot.date|date:"d.m" }} {{ b.slot.time|time:"H:i" }} · {{ b.client_name }}</span>
+        <span>{{ b.service.name }}{% if b.master %} · {{ b.master.name }}{% endif %}</span>
+      </div>
+      {% empty %}<p style="color:rgba(50,47,54,.5)">Пока нет предстоящих записей</p>{% endfor %}
+    </div>
+    <div class="bk-panel">
+      <h3>Популярные услуги</h3>
+      {% for s in popular_services %}
+      <div class="bk-row"><span>{{ s.name }}</span><span>{{ s.n }} зап.</span></div>
+      {% empty %}<p style="color:rgba(50,47,54,.5)">—</p>{% endfor %}
+      <h3 style="margin-top:18px">Популярные мастера</h3>
+      {% for m in popular_masters %}
+      <div class="bk-row"><span>{{ m.name }}</span><span>{{ m.n }} зап.</span></div>
+      {% empty %}<p style="color:rgba(50,47,54,.5)">—</p>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

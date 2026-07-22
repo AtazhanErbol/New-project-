@@ -1,0 +1,19 @@
+# systemd-сервис для запуска Django через gunicorn.
+# Скопировать в /etc/systemd/system/gunicorn.service
+
+[Unit]
+Description=gunicorn daemon for Beauty by Kabylova
+After=network.target
+
+[Service]
+WorkingDirectory=/root/New-project-
+ExecStart=/root/New-project-/venv/bin/gunicorn \
+    --workers 3 \
+    --timeout 60 \
+    --bind 127.0.0.1:8000 \
+    config.wsgi:application
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

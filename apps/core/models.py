@@ -2,8 +2,9 @@ from django.db import models
 
 
 class SiteSettings(models.Model):
-    site_name = models.CharField(max_length=200, default='Beauty by Kabylova', verbose_name='Название сайта')
-    logo_text = models.CharField(max_length=100, default='by Kabylova', verbose_name='Текст логотипа')
+    site_name = models.CharField(max_length=200, default='Aurora Beauty Studio', verbose_name='Название сайта')
+    logo_text = models.CharField(max_length=100, default='Aurora', verbose_name='Текст логотипа')
+    logo_image = models.ImageField(upload_to='logo/', blank=True, verbose_name='Логотип (картинка)')
     phone = models.CharField(max_length=30, blank=True, verbose_name='Телефон')
     address = models.CharField(max_length=200, blank=True, verbose_name='Адрес')
     working_hours = models.CharField(max_length=100, blank=True, verbose_name='Режим работы')
@@ -16,6 +17,24 @@ class SiteSettings(models.Model):
     tiktok_url = models.URLField(blank=True, verbose_name='TikTok')
     youtube_url = models.URLField(blank=True, verbose_name='YouTube')
     hero_image = models.ImageField(upload_to='hero/', blank=True, verbose_name='Фото героя')
+    hero_eyebrow = models.CharField(
+        max_length=120, blank=True, default='Студия красоты · Астана',
+        verbose_name='Надпись над заголовком (hero)',
+    )
+    hero_title = models.CharField(
+        max_length=120, blank=True, default='Красота в каждой детали',
+        verbose_name='Большой заголовок (hero)',
+    )
+    hero_typeline = models.CharField(
+        max_length=80, blank=True, default='Мы делаем —',
+        verbose_name='Текст перед бегущими словами (hero)',
+    )
+    service_tags = models.CharField(
+        max_length=300, blank=True,
+        default='Маникюр, Педикюр, Дизайн ногтей, Наращивание, Гель-лак, Уход',
+        verbose_name='Ключевые услуги (через запятую)',
+        help_text='Показываются в бегущей строке и в анимации «Мы делаем — …»',
+    )
     about_image = models.ImageField(upload_to='about/', blank=True, verbose_name='Фото о мастере')
     bio = models.TextField(blank=True, verbose_name='Bio / Описание')
     years_experience = models.PositiveIntegerField(default=0, verbose_name='Лет опыта')
@@ -55,3 +74,7 @@ class SiteSettings(models.Model):
 
     def has_social(self):
         return any([self.instagram_url, self.whatsapp, self.telegram, self.vk_url, self.facebook_url, self.tiktok_url, self.youtube_url])
+
+    @property
+    def service_tags_list(self):
+        return [t.strip() for t in (self.service_tags or '').split(',') if t.strip()]

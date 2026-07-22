@@ -4,6 +4,10 @@ from .models import Booking
 
 class BookingForm(forms.ModelForm):
     honeypot = forms.CharField(required=False, widget=forms.HiddenInput)
+    consent = forms.BooleanField(
+        required=True,
+        error_messages={'required': 'Нужно согласие на обработку персональных данных'},
+    )
 
     class Meta:
         model = Booking
