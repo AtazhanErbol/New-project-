@@ -17,6 +17,24 @@ class SiteSettings(models.Model):
     tiktok_url = models.URLField(blank=True, verbose_name='TikTok')
     youtube_url = models.URLField(blank=True, verbose_name='YouTube')
     hero_image = models.ImageField(upload_to='hero/', blank=True, verbose_name='Фото героя')
+    hero_eyebrow = models.CharField(
+        max_length=120, blank=True, default='Студия красоты · Астана',
+        verbose_name='Надпись над заголовком (hero)',
+    )
+    hero_title = models.CharField(
+        max_length=120, blank=True, default='Красота в каждой детали',
+        verbose_name='Большой заголовок (hero)',
+    )
+    hero_typeline = models.CharField(
+        max_length=80, blank=True, default='Мы делаем —',
+        verbose_name='Текст перед бегущими словами (hero)',
+    )
+    service_tags = models.CharField(
+        max_length=300, blank=True,
+        default='Маникюр, Педикюр, Дизайн ногтей, Наращивание, Гель-лак, Уход',
+        verbose_name='Ключевые услуги (через запятую)',
+        help_text='Показываются в бегущей строке и в анимации «Мы делаем — …»',
+    )
     about_image = models.ImageField(upload_to='about/', blank=True, verbose_name='Фото о мастере')
     bio = models.TextField(blank=True, verbose_name='Bio / Описание')
     years_experience = models.PositiveIntegerField(default=0, verbose_name='Лет опыта')
@@ -56,3 +74,7 @@ class SiteSettings(models.Model):
 
     def has_social(self):
         return any([self.instagram_url, self.whatsapp, self.telegram, self.vk_url, self.facebook_url, self.tiktok_url, self.youtube_url])
+
+    @property
+    def service_tags_list(self):
+        return [t.strip() for t in (self.service_tags or '').split(',') if t.strip()]

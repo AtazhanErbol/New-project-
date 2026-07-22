@@ -6,9 +6,9 @@
     </div>
     {% endif %}
     <div class="container hero__content">
-        <span class="hero__eyebrow" data-aos="fade-up">Студия красоты · Астана</span>
-        <h1 class="hero__title" data-aos="fade-up" data-aos-delay="100">Красота<br>в каждой<br>детали</h1>
-        <p class="hero__typeline" data-aos="fade-up" data-aos-delay="200">Мы делаем — <span class="hero__typewriter" id="typewriter"></span></p>
+        <span class="hero__eyebrow" data-aos="fade-up">{{ site_settings.hero_eyebrow|default:"Студия красоты · Астана" }}</span>
+        <h1 class="hero__title" data-aos="fade-up" data-aos-delay="100">{{ site_settings.hero_title|default:"Красота в каждой детали"|linebreaksbr }}</h1>
+        <p class="hero__typeline" data-aos="fade-up" data-aos-delay="200">{{ site_settings.hero_typeline|default:"Мы делаем —" }} <span class="hero__typewriter" id="typewriter" data-tags="{{ site_settings.service_tags|default:'Маникюр,Педикюр,Дизайн ногтей,Наращивание,Гель-лак' }}"></span></p>
         <p class="hero__subtitle" data-aos="fade-up" data-aos-delay="300">{{ site_settings.bio|truncatewords:15|default:"Профессиональный маникюр и педикюр в Астане" }}</p>
         <div class="hero__buttons" data-aos="fade-up" data-aos-delay="400">
             <a href="#booking" class="btn btn--gold btn--lg">Записаться онлайн</a>

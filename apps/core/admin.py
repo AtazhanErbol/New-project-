@@ -10,10 +10,15 @@ admin.site.index_title = 'Управление сайтом'
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(ModelAdmin):
     fieldsets = [
-        ('Основное', {'fields': ['site_name', 'logo_text', 'logo_image', 'hero_image', 'about_image', 'bio']}),
+        ('Название и логотип', {'fields': ['site_name', 'logo_text', 'logo_image']}),
+        ('Главный экран (hero)', {
+            'description': 'Текст и фото самого первого блока на сайте — то, что видит клиент, открыв сайт.',
+            'fields': ['hero_eyebrow', 'hero_title', 'hero_typeline', 'service_tags', 'hero_image'],
+        }),
+        ('О мастере / студии', {'fields': ['about_image', 'bio']}),
         ('Контакты', {'fields': ['phone', 'email', 'address', 'working_hours']}),
         ('Акция', {'fields': ['promo_text']}),
-        ('Статистика', {'fields': ['years_experience', 'clients_count', 'works_count']}),
+        ('Статистика (цифры на сайте)', {'fields': ['years_experience', 'clients_count', 'works_count']}),
         ('Соцсети', {'fields': ['instagram_url', 'whatsapp', 'telegram', 'vk_url', 'facebook_url', 'tiktok_url', 'youtube_url']}),
         ('Футер', {'fields': ['footer_text']}),
     ]
